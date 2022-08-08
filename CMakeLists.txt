@@ -1,21 +1,6 @@
-# project(control_blocks)
 
-# cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
-
-# include(CheckIncludeFile)
-# include(CheckIncludeFileCXX)
-# include(CheckIncludeFiles)
-
-# include_directories(
-#     ${CMAKE_CURRENT_SOURCE_DIR}/third_party 
-#     ${CMAKE_CURRENT_SOURCE_DIR}/include 
-#     )
-
-
-
-
-# Works with 3.15 and tested through 3.21
-cmake_minimum_required(VERSION 3.15...3.21)
+# Works with 3.15 
+cmake_minimum_required(VERSION 3.15)
 
 # Project name and a few useful settings. Other commands can pick up the results
 project(
