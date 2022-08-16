@@ -8,8 +8,6 @@
 #include <utility>
 #include <vector>
 
-namespace example
-{
 template<typename ElementType>
 struct Span
 {
@@ -354,4 +352,3 @@ void dfs_traverse(const Graph<NodeType>& graph, const int start_node, Visitor vi
         }
     }
 }
-} // namespace example

@@ -1,23 +1,17 @@
 
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <cmath>
-#include <vector>
+#pragma once
 
-#include <imgui.h>
-#include <SDL_keycode.h>
-#include <SDL_timer.h>
-#include <imnodes.h>
+#include <math.h>
 
-#include "controlblocks/node_editor.h"
-#include "controlblocks/graph.h"
+#include "controlblocks/example_graph.h"
 
+static float current_time_seconds = 0.f;
+static bool emulate_three_button_mouse = false;
 
-namespace example
-{
-namespace
-{
+void NodeEditorInitialize();
+void NodeEditorShow();
+void NodeEditorShutdown();
+
 enum class NodeType
 {
     add,
@@ -30,97 +24,15 @@ enum class NodeType
 
 struct Node
 {
-    NodeType type;
-    float    value;
-
-    explicit Node(const NodeType t) : type(t), value(0.f) {}
+    Node(const NodeType t) : type(t), value(0.f) {}
 
     Node(const NodeType t, const float v) : type(t), value(v) {}
+
+    NodeType type;
+    float value;
 };
 
-template<class T>
-T clamp(T x, T a, T b)
-{
-    return std::min(b, std::max(x, a));
-}
-
-static float current_time_seconds = 0.f;
-static bool  emulate_three_button_mouse = false;
-
-ImU32 evaluate(const Graph<Node>& graph, const int root_node)
-{
-    std::stack<int> postorder;
-    dfs_traverse(
-        graph, root_node, [&postorder](const int node_id) -> void { postorder.push(node_id); });
-
-    std::stack<float> value_stack;
-    while (!postorder.empty())
-    {
-        const int id = postorder.top();
-        postorder.pop();
-        const Node node = graph.node(id);
-
-        switch (node.type)
-        {
-        case NodeType::add:
-        {
-            const float rhs = value_stack.top();
-            value_stack.pop();
-            const float lhs = value_stack.top();
-            value_stack.pop();
-            value_stack.push(lhs + rhs);
-        }
-        break;
-        case NodeType::multiply:
-        {
-            const float rhs = value_stack.top();
-            value_stack.pop();
-            const float lhs = value_stack.top();
-            value_stack.pop();
-            value_stack.push(rhs * lhs);
-        }
-        break;
-        case NodeType::sine:
-        {
-            const float x = value_stack.top();
-            value_stack.pop();
-            const float res = std::abs(std::sin(x));
-            value_stack.push(res);
-        }
-        break;
-        case NodeType::time:
-        {
-            value_stack.push(current_time_seconds);
-        }
-        break;
-        case NodeType::value:
-        {
-            // If the edge does not have an edge connecting to another node, then just use the value
-            // at this node. It means the node's input pin has not been connected to anything and
-            // the value comes from the node's UI.
-            if (graph.num_edges_from_node(id) == 0ull)
-            {
-                value_stack.push(node.value);
-            }
-        }
-        break;
-        default:
-            break;
-        }
-    }
-
-    // The final output node isn't evaluated in the loop -- instead we just pop
-    // the three values which should be in the stack.
-    assert(value_stack.size() == 3ull);
-    const int b = static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
-    value_stack.pop();
-    const int g = static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
-    value_stack.pop();
-    const int r = static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
-    value_stack.pop();
-
-    return IM_COL32(r, g, b, 255);
-}
+template <class T> T clamp(T x, T a, T b);
 
 class ColorNodeEditor
 {
@@ -129,6 +41,86 @@ public:
         : graph_(), nodes_(), root_node_id_(-1),
           minimap_location_(ImNodesMiniMapLocation_BottomRight)
     {
+    }
+
+    ImU32 evaluate(const Graph<Node> &graph, const int root_node)
+    {
+        std::stack<int> postorder;
+        dfs_traverse(graph, root_node,
+                     [&postorder](const int node_id) -> void
+                     { postorder.push(node_id); });
+
+        std::stack<float> value_stack;
+        while (!postorder.empty())
+        {
+            const int id = postorder.top();
+            postorder.pop();
+            const Node node = graph.node(id);
+
+            switch (node.type)
+            {
+            case NodeType::add:
+            {
+                const float rhs = value_stack.top();
+                value_stack.pop();
+                const float lhs = value_stack.top();
+                value_stack.pop();
+                value_stack.push(lhs + rhs);
+            }
+            break;
+            case NodeType::multiply:
+            {
+                const float rhs = value_stack.top();
+                value_stack.pop();
+                const float lhs = value_stack.top();
+                value_stack.pop();
+                value_stack.push(rhs * lhs);
+            }
+            break;
+            case NodeType::sine:
+            {
+                const float x = value_stack.top();
+                value_stack.pop();
+                const float res = std::abs(std::sin(x));
+                value_stack.push(res);
+            }
+            break;
+            case NodeType::time:
+            {
+                value_stack.push(current_time_seconds);
+            }
+            break;
+            case NodeType::value:
+            {
+                // If the edge does not have an edge connecting to another node,
+                // then just use the value at this node. It means the node's
+                // input pin has not been connected to anything and the value
+                // comes from the node's UI.
+                if (graph.num_edges_from_node(id) == 0ull)
+                {
+                    value_stack.push(node.value);
+                }
+            }
+            break;
+            default:
+                break;
+            }
+        }
+
+        // The final output node isn't evaluated in the loop -- instead we just
+        // pop the three values which should be in the stack.
+        assert(value_stack.size() == 3ull);
+        const int b =
+            static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
+        value_stack.pop();
+        const int g =
+            static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
+        value_stack.pop();
+        const int r =
+            static_cast<int>(255.f * clamp(value_stack.top(), 0.f, 1.f) + 0.5f);
+        value_stack.pop();
+
+        return IM_COL32(r, g, b, 255);
     }
 
     void show()
@@ -145,7 +137,7 @@ public:
         {
             if (ImGui::BeginMenu("Mini-map"))
             {
-                const char* names[] = {
+                const char *names[] = {
                     "Top Left",
                     "Top Right",
                     "Bottom Left",
@@ -190,12 +182,14 @@ public:
             ImGui::EndMenuBar();
         }
 
-        ImGui::TextUnformatted("Edit the color of the output color window using nodes.");
+        ImGui::TextUnformatted(
+            "Edit the color of the output color window using nodes.");
         ImGui::Columns(2);
         ImGui::TextUnformatted("A -- add node");
         ImGui::TextUnformatted("X -- delete selected node or link");
         ImGui::NextColumn();
-        if (ImGui::Checkbox("emulate_three_button_mouse", &emulate_three_button_mouse))
+        if (ImGui::Checkbox("emulate_three_button_mouse",
+                            &emulate_three_button_mouse))
         {
             ImNodes::GetIO().EmulateThreeButtonMouse.Modifier =
                 emulate_three_button_mouse ? &ImGui::GetIO().KeyAlt : NULL;
@@ -205,11 +199,13 @@ public:
         ImNodes::BeginNodeEditor();
 
         // Handle new nodes
-        // These are driven by the user, so we place this code before rendering the nodes
+        // These are driven by the user, so we place this code before rendering
+        // the nodes
         {
-            const bool open_popup = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
-                                    ImNodes::IsEditorHovered() &&
-                                    ImGui::IsKeyReleased(SDL_SCANCODE_A);
+            const bool open_popup =
+                ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
+                ImNodes::IsEditorHovered() &&
+                ImGui::IsKeyReleased(SDL_SCANCODE_A);
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.f, 8.f));
             if (!ImGui::IsAnyItemHovered() && open_popup)
@@ -219,7 +215,8 @@ public:
 
             if (ImGui::BeginPopup("add node"))
             {
-                const ImVec2 click_pos = ImGui::GetMousePosOnOpeningCurrentPopup();
+                const ImVec2 click_pos =
+                    ImGui::GetMousePosOnOpeningCurrentPopup();
 
                 if (ImGui::MenuItem("add"))
                 {
@@ -309,7 +306,7 @@ public:
             ImGui::PopStyleVar();
         }
 
-        for (const UiNode& node : nodes_)
+        for (const UiNode &node : nodes_)
         {
             switch (node.type)
             {
@@ -329,7 +326,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat("##hidelabel", &graph_.node(node.ui.add.lhs).value, 0.01f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.add.lhs).value,
+                                         0.01f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -343,7 +342,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat("##hidelabel", &graph_.node(node.ui.add.rhs).value, 0.01f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.add.rhs).value,
+                                         0.01f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -375,12 +376,14 @@ public:
                     ImNodes::BeginInputAttribute(node.ui.multiply.lhs);
                     const float label_width = ImGui::CalcTextSize("left").x;
                     ImGui::TextUnformatted("left");
-                    if (graph_.num_edges_from_node(node.ui.multiply.lhs) == 0ull)
+                    if (graph_.num_edges_from_node(node.ui.multiply.lhs) ==
+                        0ull)
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
                         ImGui::DragFloat(
-                            "##hidelabel", &graph_.node(node.ui.multiply.lhs).value, 0.01f);
+                            "##hidelabel",
+                            &graph_.node(node.ui.multiply.lhs).value, 0.01f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -390,12 +393,14 @@ public:
                     ImNodes::BeginInputAttribute(node.ui.multiply.rhs);
                     const float label_width = ImGui::CalcTextSize("right").x;
                     ImGui::TextUnformatted("right");
-                    if (graph_.num_edges_from_node(node.ui.multiply.rhs) == 0ull)
+                    if (graph_.num_edges_from_node(node.ui.multiply.rhs) ==
+                        0ull)
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
                         ImGui::DragFloat(
-                            "##hidelabel", &graph_.node(node.ui.multiply.rhs).value, 0.01f);
+                            "##hidelabel",
+                            &graph_.node(node.ui.multiply.rhs).value, 0.01f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -417,9 +422,12 @@ public:
             case UiNodeType::output:
             {
                 const float node_width = 100.0f;
-                ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(11, 109, 191, 255));
-                ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(45, 126, 194, 255));
-                ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(81, 148, 204, 255));
+                ImNodes::PushColorStyle(ImNodesCol_TitleBar,
+                                        IM_COL32(11, 109, 191, 255));
+                ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered,
+                                        IM_COL32(45, 126, 194, 255));
+                ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected,
+                                        IM_COL32(81, 148, 204, 255));
                 ImNodes::BeginNode(node.id);
 
                 ImNodes::BeginNodeTitleBar();
@@ -435,8 +443,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat(
-                            "##hidelabel", &graph_.node(node.ui.output.r).value, 0.01f, 0.f, 1.0f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.output.r).value,
+                                         0.01f, 0.f, 1.0f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -452,8 +461,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat(
-                            "##hidelabel", &graph_.node(node.ui.output.g).value, 0.01f, 0.f, 1.f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.output.g).value,
+                                         0.01f, 0.f, 1.f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -469,8 +479,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat(
-                            "##hidelabel", &graph_.node(node.ui.output.b).value, 0.01f, 0.f, 1.0f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.output.b).value,
+                                         0.01f, 0.f, 1.0f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -498,12 +509,9 @@ public:
                     {
                         ImGui::SameLine();
                         ImGui::PushItemWidth(node_width - label_width);
-                        ImGui::DragFloat(
-                            "##hidelabel",
-                            &graph_.node(node.ui.sine.input).value,
-                            0.01f,
-                            0.f,
-                            1.0f);
+                        ImGui::DragFloat("##hidelabel",
+                                         &graph_.node(node.ui.sine.input).value,
+                                         0.01f, 0.f, 1.0f);
                         ImGui::PopItemWidth();
                     }
                     ImNodes::EndInputAttribute();
@@ -540,7 +548,7 @@ public:
             }
         }
 
-        for (const auto& edge : graph_.edges())
+        for (const auto &edge : graph_.edges())
         {
             // If edge doesn't start at value, then it's an internal edge, i.e.
             // an edge which links a node's operation to its input. We don't
@@ -555,7 +563,8 @@ public:
         ImNodes::EndNodeEditor();
 
         // Handle new links
-        // These are driven by Imnodes, so we place the code after EndNodeEditor().
+        // These are driven by Imnodes, so we place the code after
+        // EndNodeEditor().
 
         {
             int start_attr, end_attr;
@@ -612,10 +621,10 @@ public:
                 for (const int node_id : selected_nodes)
                 {
                     graph_.erase_node(node_id);
-                    auto iter = std::find_if(
-                        nodes_.begin(), nodes_.end(), [node_id](const UiNode& node) -> bool {
-                            return node.id == node_id;
-                        });
+                    auto iter =
+                        std::find_if(nodes_.begin(), nodes_.end(),
+                                     [node_id](const UiNode &node) -> bool
+                                     { return node.id == node_id; });
                     // Erase any additional internal nodes
                     switch (iter->type)
                     {
@@ -648,8 +657,9 @@ public:
 
         // The color output window
 
-        const ImU32 color =
-            root_node_id_ != -1 ? evaluate(graph_, root_node_id_) : IM_COL32(255, 20, 147, 255);
+        const ImU32 color = root_node_id_ != -1
+                                ? evaluate(graph_, root_node_id_)
+                                : IM_COL32(255, 20, 147, 255);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
         ImGui::Begin("output color");
         ImGui::End();
@@ -698,22 +708,10 @@ private:
         } ui;
     };
 
-    Graph<Node>            graph_;
-    std::vector<UiNode>    nodes_;
-    int                    root_node_id_;
+    Graph<Node> graph_;
+    std::vector<UiNode> nodes_;
+    int root_node_id_;
     ImNodesMiniMapLocation minimap_location_;
 };
 
 static ColorNodeEditor color_editor;
-} // namespace
-
-void NodeEditorInitialize()
-{
-    ImNodesIO& io = ImNodes::GetIO();
-    io.LinkDetachWithModifierClick.Modifier = &ImGui::GetIO().KeyCtrl;
-}
-
-void NodeEditorShow() { color_editor.show(); }
-
-void NodeEditorShutdown() {}
-} // namespace example
