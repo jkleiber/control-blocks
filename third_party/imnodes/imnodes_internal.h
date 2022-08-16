@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controlblocks/imnodes.h"
+#include "imnodes.h"
 
 #include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS

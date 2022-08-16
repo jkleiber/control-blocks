@@ -50,3 +50,18 @@ target_include_directories(IMPLOT
 )
 
 target_link_libraries(IMPLOT PUBLIC IMGUI)
+
+# ============== ImNodes =======================
+set(IMNODES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imnodes)
+add_library(IMNODES STATIC)
+
+target_sources(IMNODES
+    PRIVATE
+    ${IMNODES_DIR}/imnodes.cpp
+)
+
+target_include_directories(IMNODES
+    PUBLIC ${IMNODES_DIR}/
+)
+
+target_link_libraries(IMNODES PUBLIC IMGUI)

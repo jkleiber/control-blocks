@@ -10,7 +10,7 @@ file(GLOB SOURCE_LIST
   "${ControlBlocks_SOURCE_DIR}/src/*.cpp")
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(controlblocks_lib ${SOURCE_LIST} ${HEADER_LIST})
+add_library(controlblocks_lib STATIC ${SOURCE_LIST} ${HEADER_LIST})
 set_target_properties(controlblocks_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 # We need the top level include directory as well as the imgui ones.
@@ -24,7 +24,7 @@ else()
 endif(WIN32)
 
 # This depends on imgui
-target_link_libraries(controlblocks_lib PUBLIC IMGUI IMPLOT)
+target_link_libraries(controlblocks_lib PUBLIC IMGUI IMPLOT IMNODES)
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)

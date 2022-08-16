@@ -8,10 +8,11 @@
 #include <imgui.h>
 #include <SDL_keycode.h>
 #include <SDL_timer.h>
+#include <imnodes.h>
 
 #include "controlblocks/node_editor.h"
 #include "controlblocks/graph.h"
-#include "controlblocks/imnodes.h"
+
 
 namespace example
 {

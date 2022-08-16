@@ -1,9 +1,8 @@
-#include "controlblocks/imnodes.h"
-#include "controlblocks/node_editor.h"
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
+#include "imnodes.h"
 
 #include <SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -13,6 +12,8 @@
 #endif
 
 #include <stdio.h>
+
+#include "controlblocks/node_editor.h"
 
 int main(int argc, char **argv)
 {

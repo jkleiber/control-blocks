@@ -6,8 +6,8 @@
 // [SECTION] render helpers
 // [SECTION] API implementation
 
-#include "controlblocks/imnodes.h"
-#include "controlblocks/imnodes_internal.h"
+#include "imnodes.h"
+#include "imnodes_internal.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
