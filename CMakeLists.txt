@@ -8,6 +8,7 @@ project(
     DESCRIPTION "Control system design application"
     LANGUAGES CXX)
 
+# Do static linking
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif(WIN32)
