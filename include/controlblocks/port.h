@@ -6,36 +6,41 @@
 
 #include <Eigen/Dense>
 
-typedef enum port_type_t
+namespace ControlBlock
 {
-    INPUT = 0,
-    OUTPUT
-} PortType;
-
-class Port
-{
-public:
-    Port(std::string name, uint16_t size, PortType type)
-        : name_(name), size_(size), type_(type)
+    typedef enum port_type_t
     {
-    }
-    ~Port() {}
+        INPUT_PORT = 0,
+        OUTPUT_PORT
+    } PortType;
 
-    void AddConnection(Port &p);
+    class Port
+    {
+    public:
+        Port(std::string name, PortType type) : name_(name), type_(type) {}
+        ~Port() {}
 
-    void SetValue(Eigen::VectorXd val);
-    void Broadcast();
+        void AddConnection(Port &p);
 
-    std::string GetName();
+        // Inputs
+        Eigen::VectorXd GetValue();
 
-private:
-    std::vector<Port> conns_;
+        // Outputs
+        void SetValue(Eigen::VectorXd val);
+        void Broadcast();
 
-    // Port characteristics
-    std::string name_;
-    uint16_t size_;
-    PortType type_;
+        // Port characteristics
+        std::string GetName();
 
-    // Value
-    Eigen::VectorXd val_;
-};
+    private:
+        std::vector<Port> conns_;
+
+        // Port characteristics
+        std::string name_;
+        uint16_t size_;
+        PortType type_;
+
+        // Value
+        Eigen::VectorXd val_;
+    };
+} // namespace ControlBlock

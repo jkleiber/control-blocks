@@ -20,15 +20,24 @@ namespace ControlBlock
         Block(Diagram &diagram) : diagram_(diagram) {}
 
         void Init(std::string block_name, std::vector<std::string> input_names,
-                  std::vector<uint16_t> input_sizes,
-                  std::vector<std::string> output_names,
-                  std::vector<uint16_t> output_sizes);
+                  std::vector<std::string> output_names);
         void Broadcast();
+        virtual void Compute();
         virtual void Render();
 
         // Block characteristics
         int GetId();
         std::string GetName();
+        void SetPosition(const ImVec2 pos);
+
+        // Ports
+        int NumInputPorts();
+        Port GetInputPort(int index);
+        int GetInputPortId(int index);
+
+        int NumOutputPorts();
+        Port GetOutputPort(int index);
+        int GetOutputPortId(int index);
 
         // Inputs
         Eigen::VectorXd GetInput(std::string port_name);

@@ -18,12 +18,15 @@ void Diagram::Update()
     // Allow blocks to be added to the diagram
     this->AddBlockPopup();
 
-    // Render the whole diagram
+    // Render the blocks in the diagram
     this->Render();
 
     // End the diagram editor
     ImNodes::EndNodeEditor();
     ImGui::End();
+
+    // Add / Remove new wires to the diagram
+    this->EditWires();
 }
 
 int Diagram::AddItem()
@@ -34,6 +37,17 @@ int Diagram::AddItem()
     return id;
 }
 
+void Diagram::AddWire(int from, int to)
+{
+    // Create and initialize wire.
+    std::shared_ptr<ControlBlock::Wire> wire =
+        std::make_shared<ControlBlock::Wire>(*this, from, to);
+    wire->Init();
+
+    // Add wire to the diagram
+    wires_.push_back(wire);
+}
+
 void Diagram::Render()
 {
     // Render each block according to its Render() function
@@ -41,6 +55,38 @@ void Diagram::Render()
     {
         blocks_[i]->Render();
     }
+
+    // Render each wire
+    for (size_t i = 0; i < wires_.size(); ++i)
+    {
+        wires_[i]->Render();
+    }
+}
+
+void Diagram::EditWires()
+{
+    // Detect wire creations
+    // TODO: validation
+    int start_attr, end_attr;
+    if (ImNodes::IsLinkCreated(&start_attr, &end_attr))
+    {
+        this->AddWire(start_attr, end_attr);
+    }
+    //     const NodeType start_type = graph_.node(start_attr).type;
+    //     const NodeType end_type = graph_.node(end_attr).type;
+
+    //     const bool valid_link = start_type != end_type;
+    //     if (valid_link)
+    //     {
+    //         // Ensure the edge is always directed from the value to
+    //         // whatever produces the value
+    //         if (start_type != NodeType::value)
+    //         {
+    //             std::swap(start_attr, end_attr);
+    //         }
+    //         graph_.insert_edge(start_attr, end_attr);
+    //     }
+    // }
 }
 
 void Diagram::AddBlockPopup()
@@ -67,16 +113,33 @@ void Diagram::AddBlockPopup()
         if (ImGui::MenuItem("Constant"))
         {
             // Create a constant block
-            std::shared_ptr<ControlBlock::ConstantBlock> const_block =
-                std::make_shared<ControlBlock::ConstantBlock>(*this);
-
-            // Initialize
-            const_block->Init();
-
-            // Add the new block to the diagram's list of blocks
-            blocks_.push_back(const_block);
+            this->AddBlock<ControlBlock::ConstantBlock>(click_pos);
+        }
+        else if (ImGui::MenuItem("Gain"))
+        {
+            // Create gain block
+            this->AddBlock<ControlBlock::GainBlock>(click_pos);
+        }
+        else if (ImGui::MenuItem("Display"))
+        {
+            // Register new display block
+            this->AddBlock<ControlBlock::DisplayBlock>(click_pos);
         }
 
         ImGui::EndPopup(); // end "Add Block"
+    }
+}
+
+ControlBlock::Port Diagram::GetPort(int id, ControlBlock::PortType port_type)
+{
+    // Look through each block and find the port based on ID and type
+    for (size_t i = 0; i < blocks_.size(); ++i)
+    {
+        if (port_type == ControlBlock::INPUT_PORT)
+        {
+        }
+        else
+        {
+        }
     }
 }

@@ -1,29 +1,27 @@
-#include "controlblocks/constant_block.h"
+#include "controlblocks/display_block.h"
 
 namespace ControlBlock
 {
 
-    void ConstantBlock::Init(std::string block_name)
+    void DisplayBlock::Init(std::string block_name)
     {
         // Name the port based on the block
-        output_port_name_ = block_name + "_output";
+        input_port_name_ = block_name + "_input";
 
         // Initialize the block with a single output and no inputs
-        std::vector<std::string> no_input_names;
-        std::vector<std::string> output_name = {output_port_name_};
+        std::vector<std::string> input_name = {input_port_name_};
+        std::vector<std::string> output_name;
 
-        Block::Init(block_name, no_input_names, output_name);
+        Block::Init(block_name, input_name, output_name);
     }
 
-    void ConstantBlock::Compute()
+    void DisplayBlock::Compute()
     {
-        Eigen::VectorXd output;
-        output << val_;
-        Block::SetOutput(output_port_name_, output);
-        Block::Broadcast();
+        // Get the input
+        val_ = Block::GetInput(input_port_name_);
     }
 
-    void ConstantBlock::Render()
+    void DisplayBlock::Render()
     {
         ImNodes::BeginNode(this->id_);
 
@@ -43,14 +41,18 @@ namespace ControlBlock
         this->name_ = name_str;
         ImNodes::EndNodeTitleBar();
 
-        for (size_t i = 0; i < outputs_.size(); ++i)
-        {
-            int idx = static_cast<int>(i);
+        // Input
+        ImNodes::BeginInputAttribute(input_ids_[0]);
+        // ImGui::TextUnformatted(inputs_[i].GetName().c_str());
+        ImNodes::EndInputAttribute();
 
-            ImNodes::BeginOutputAttribute(output_ids_[i]);
-            ImGui::InputScalar("", ImGuiDataType_Double, &val_, NULL);
-            ImNodes::EndOutputAttribute();
+        // Print each value in a new line.
+        for (int i = 0; i < val_.size(); ++i)
+        {
+            ImGui::Text(std::to_string(val_(i)).c_str());
         }
+
+        ImGui::Spacing();
 
         // Reset item width for the next block.
         ImGui::PopItemWidth();

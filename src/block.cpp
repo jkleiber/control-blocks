@@ -6,9 +6,7 @@ namespace ControlBlock
 
     void Block::Init(std::string block_name,
                      std::vector<std::string> input_names,
-                     std::vector<uint16_t> input_sizes,
-                     std::vector<std::string> output_names,
-                     std::vector<uint16_t> output_sizes)
+                     std::vector<std::string> output_names)
     {
         id_ = diagram_.AddItem();
         name_ = block_name;
@@ -19,7 +17,7 @@ namespace ControlBlock
         // Create input ports
         for (size_t i = 0; i < input_names.size(); ++i)
         {
-            Port p(input_names[i], input_sizes[i], PortType::INPUT);
+            Port p(input_names[i], PortType::INPUT_PORT);
             inputs_.push_back(p);
             input_ids_.push_back(diagram_.AddItem());
 
@@ -30,7 +28,7 @@ namespace ControlBlock
         // Create output ports
         for (size_t i = 0; i < output_names.size(); ++i)
         {
-            Port p(output_names[i], output_sizes[i], PortType::OUTPUT);
+            Port p(output_names[i], PortType::OUTPUT_PORT);
             outputs_.push_back(p);
             output_ids_.push_back(diagram_.AddItem());
 
@@ -45,6 +43,14 @@ namespace ControlBlock
         {
             outputs_[i].Broadcast();
         }
+    }
+
+    void Block::Compute()
+    {
+        /**
+         * @brief Implement Compute() in each sub-block to get different I/O
+         */
+        this->Broadcast();
     }
 
     void Block::Render()
@@ -67,8 +73,6 @@ namespace ControlBlock
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
             ImNodes::BeginInputAttribute(input_ids_[i]);
-            const float label_width =
-                ImGui::CalcTextSize(inputs_[i].GetName().c_str()).x;
             ImGui::TextUnformatted(inputs_[i].GetName().c_str());
             ImNodes::EndInputAttribute();
         }
@@ -93,6 +97,80 @@ namespace ControlBlock
     int Block::GetId() { return this->id_; }
 
     std::string Block::GetName() { return this->name_; }
+
+    void Block::SetPosition(ImVec2 pos)
+    {
+        ImNodes::SetNodeScreenSpacePos(this->id_, pos);
+    }
+
+    int Block::NumInputPorts() { return inputs_.size(); }
+
+    Port Block::GetInputPort(int index)
+    {
+        if (index < 0 || index > inputs_.size())
+        {
+            throw std::out_of_range("Input port index " +
+                                    std::to_string(index) +
+                                    " is out of range for block " +
+                                    this->name_ + " when getting port.");
+        }
+        return inputs_[index];
+    }
+
+    int Block::GetInputPortId(int index)
+    {
+        if (index < 0 || index > inputs_.size())
+        {
+            throw std::out_of_range("Input port index " +
+                                    std::to_string(index) +
+                                    " is out of range for block " +
+                                    this->name_ + " when getting port ID.");
+        }
+        return input_ids_[index];
+    }
+
+    int Block::NumOutputPorts() { return outputs_.size(); }
+
+    Port Block::GetOutputPort(int index)
+    {
+        if (index < 0 || index > outputs_.size())
+        {
+            throw std::out_of_range("Output port index " +
+                                    std::to_string(index) +
+                                    " is out of range for block " +
+                                    this->name_ + " when getting port.");
+        }
+        return outputs_[index];
+    }
+
+    int Block::GetOutputPortId(int index)
+    {
+        if (index < 0 || index > outputs_.size())
+        {
+            throw std::out_of_range("Output port index " +
+                                    std::to_string(index) +
+                                    " is out of range for block " +
+                                    this->name_ + " when getting port ID.");
+        }
+        return output_ids_[index];
+    }
+
+    Eigen::VectorXd Block::GetInput(std::string port_name)
+    {
+        // Collect the input from the correct port.
+        // Note: This does not check for duplicate port names. The first port
+        // with that name will be chosen. Any duplicates will be ignored.
+        for (size_t i = 0; i < inputs_.size(); ++i)
+        {
+            if (inputs_[i].GetName() == port_name)
+            {
+                return inputs_[i].GetValue();
+            }
+        }
+
+        throw std::runtime_error("No input port with name: " + port_name +
+                                 " for block: " + this->name_);
+    }
 
     void Block::SetOutput(std::string port_name, Eigen::VectorXd val)
     {
