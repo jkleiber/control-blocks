@@ -17,7 +17,8 @@ namespace ControlBlock
         // Create input ports
         for (size_t i = 0; i < input_names.size(); ++i)
         {
-            Port p(input_names[i], PortType::INPUT_PORT);
+            std::shared_ptr<Port> p = std::make_shared<Port>(
+                input_names[i], PortType::INPUT_PORT, id_);
             inputs_.push_back(p);
             input_ids_.push_back(diagram_.AddItem());
 
@@ -28,7 +29,8 @@ namespace ControlBlock
         // Create output ports
         for (size_t i = 0; i < output_names.size(); ++i)
         {
-            Port p(output_names[i], PortType::OUTPUT_PORT);
+            std::shared_ptr<Port> p = std::make_shared<Port>(
+                output_names[i], PortType::OUTPUT_PORT, id_);
             outputs_.push_back(p);
             output_ids_.push_back(diagram_.AddItem());
 
@@ -41,7 +43,7 @@ namespace ControlBlock
         // Broadcast to the output ports
         for (size_t i = 0; i < outputs_.size(); ++i)
         {
-            outputs_[i].Broadcast();
+            outputs_[i]->Broadcast();
         }
     }
 
@@ -73,7 +75,7 @@ namespace ControlBlock
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
             ImNodes::BeginInputAttribute(input_ids_[i]);
-            ImGui::TextUnformatted(inputs_[i].GetName().c_str());
+            ImGui::TextUnformatted(inputs_[i]->GetName().c_str());
             ImNodes::EndInputAttribute();
         }
 
@@ -85,9 +87,9 @@ namespace ControlBlock
 
             ImNodes::BeginOutputAttribute(output_ids_[i]);
             const float label_width =
-                ImGui::CalcTextSize(outputs_[i].GetName().c_str()).x;
+                ImGui::CalcTextSize(outputs_[i]->GetName().c_str()).x;
             ImGui::Indent(node_width - label_width);
-            ImGui::TextUnformatted(outputs_[i].GetName().c_str());
+            ImGui::TextUnformatted(outputs_[i]->GetName().c_str());
             ImNodes::EndOutputAttribute();
         }
 
@@ -105,7 +107,7 @@ namespace ControlBlock
 
     int Block::NumInputPorts() { return inputs_.size(); }
 
-    Port Block::GetInputPort(int index)
+    std::shared_ptr<Port> Block::GetInputPort(int index)
     {
         if (index < 0 || index > inputs_.size())
         {
@@ -129,9 +131,24 @@ namespace ControlBlock
         return input_ids_[index];
     }
 
+    std::shared_ptr<Port> Block::FindInputPortByImNodesId(int imnode_id)
+    {
+        // Try to find the imnode id in the input ports
+        for (size_t i = 0; i < input_ids_.size(); ++i)
+        {
+            if (input_ids_[i] == imnode_id)
+            {
+                return inputs_[i];
+            }
+        }
+
+        // If nothing was found, return nullptr
+        return nullptr;
+    }
+
     int Block::NumOutputPorts() { return outputs_.size(); }
 
-    Port Block::GetOutputPort(int index)
+    std::shared_ptr<Port> Block::GetOutputPort(int index)
     {
         if (index < 0 || index > outputs_.size())
         {
@@ -155,6 +172,21 @@ namespace ControlBlock
         return output_ids_[index];
     }
 
+    std::shared_ptr<Port> Block::FindOutputPortByImNodesId(int imnode_id)
+    {
+        // Try to find the imnode id in the input ports
+        for (size_t i = 0; i < output_ids_.size(); ++i)
+        {
+            if (output_ids_[i] == imnode_id)
+            {
+                return outputs_[i];
+            }
+        }
+
+        // If nothing was found, return nullptr
+        return nullptr;
+    }
+
     Eigen::VectorXd Block::GetInput(std::string port_name)
     {
         // Collect the input from the correct port.
@@ -162,9 +194,9 @@ namespace ControlBlock
         // with that name will be chosen. Any duplicates will be ignored.
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
-            if (inputs_[i].GetName() == port_name)
+            if (inputs_[i]->GetName() == port_name)
             {
-                return inputs_[i].GetValue();
+                return inputs_[i]->GetValue();
             }
         }
 
@@ -179,9 +211,9 @@ namespace ControlBlock
         // with that name will be chosen. Any duplicates will be ignored.
         for (size_t i = 0; i < outputs_.size(); ++i)
         {
-            if (outputs_[i].GetName() == port_name)
+            if (outputs_[i]->GetName() == port_name)
             {
-                outputs_[i].SetValue(val);
+                outputs_[i]->SetValue(val);
                 break;
             }
         }

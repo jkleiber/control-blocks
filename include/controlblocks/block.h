@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,12 +33,14 @@ namespace ControlBlock
 
         // Ports
         int NumInputPorts();
-        Port GetInputPort(int index);
+        std::shared_ptr<Port> GetInputPort(int index);
         int GetInputPortId(int index);
+        std::shared_ptr<Port> FindInputPortByImNodesId(int imnode_id);
 
         int NumOutputPorts();
-        Port GetOutputPort(int index);
+        std::shared_ptr<Port> GetOutputPort(int index);
         int GetOutputPortId(int index);
+        std::shared_ptr<Port> FindOutputPortByImNodesId(int imnode_id);
 
         // Inputs
         Eigen::VectorXd GetInput(std::string port_name);
@@ -54,8 +57,8 @@ namespace ControlBlock
         Diagram &diagram_;
 
         // Block ports
-        std::vector<Port> inputs_;
-        std::vector<Port> outputs_;
+        std::vector<std::shared_ptr<Port>> inputs_;
+        std::vector<std::shared_ptr<Port>> outputs_;
         std::vector<int> input_ids_;
         std::vector<int> output_ids_;
     };

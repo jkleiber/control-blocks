@@ -10,6 +10,7 @@
 #include "implot.h"
 
 #include "controlblocks/block.h"
+#include "controlblocks/gui_data.h"
 #include "controlblocks/port.h"
 #include "controlblocks/wire.h"
 
@@ -31,11 +32,19 @@ class Diagram
 {
 
 public:
-    Diagram() : num_items_(0) {}
+    Diagram() : num_items_(0), sim_running_(false) {}
     ~Diagram() {}
 
+    Diagram(const Diagram &diagram)
+    {
+        this->blocks_ = diagram.blocks_;
+        this->wires_ = diagram.wires_;
+        this->num_items_ = diagram.num_items_;
+        this->sim_running_ = diagram.sim_running_;
+    }
+
     void Init();
-    void Update();
+    void Update(GuiData &gui_data);
 
     int AddItem();
 
@@ -65,7 +74,14 @@ private:
     std::vector<std::shared_ptr<ControlBlock::Block>> blocks_;
     std::vector<std::shared_ptr<ControlBlock::Wire>> wires_;
 
+    // ID tracking
     int num_items_;
+
+    // Simulation tracking
+    bool sim_running_;
+
+    // Diagram simulation
+    void Compute();
 
     // Diagram rendering
     void Render();
@@ -73,5 +89,5 @@ private:
     void EditWires();
 
     // Block searching
-    ControlBlock::Port GetPort(int id, ControlBlock::PortType port_type);
+    std::shared_ptr<ControlBlock::Port> GetPortByImNodesId(int id);
 };

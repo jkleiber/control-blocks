@@ -15,8 +15,9 @@
 #include <SDL_opengl.h>
 #endif
 
-#include "controlblocks/color_node_editor.h"
 #include "controlblocks/diagram.h"
+#include "controlblocks/gui_data.h"
+
 
 class Gui
 {
@@ -36,6 +37,7 @@ private:
     SDL_GLContext gl_context;
 
     Diagram diagram_;
+    GuiData gui_data_;
 
     void Menubar();
     void Toolbar();

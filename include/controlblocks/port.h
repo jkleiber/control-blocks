@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -8,6 +10,8 @@
 
 namespace ControlBlock
 {
+    // Forward declare "Block" so the port can know its parent
+    class Block;
     typedef enum port_type_t
     {
         INPUT_PORT = 0,
@@ -17,23 +21,45 @@ namespace ControlBlock
     class Port
     {
     public:
-        Port(std::string name, PortType type) : name_(name), type_(type) {}
+        Port(std::string name, PortType type, int parent_id)
+            : name_(name), type_(type), in_conn_(nullptr), parent_id_(parent_id)
+        {
+        }
+
+        Port(const Port &p)
+        {
+            this->name_ = p.name_;
+            this->type_ = p.type_;
+            this->in_conn_ = p.in_conn_;
+            this->out_conns_ = p.out_conns_;
+        }
+
         ~Port() {}
 
-        void AddConnection(Port &p);
+        void operator=(Port &p);
+        bool operator==(const Port &a) const;
+
+        // Connection management
+        void AddConnection(std::shared_ptr<Port> p);
+        void RemoveConnection(std::shared_ptr<Port> p);
+        bool ConnectedInput();
 
         // Inputs
         Eigen::VectorXd GetValue();
 
         // Outputs
-        void SetValue(Eigen::VectorXd val);
         void Broadcast();
+        void Receive(Eigen::VectorXd val, Port &caller);
 
         // Port characteristics
         std::string GetName();
+        PortType GetType();
+        void SetValue(Eigen::VectorXd val);
+        int GetParentId();
 
     private:
-        std::vector<Port> conns_;
+        std::shared_ptr<Port> in_conn_;
+        std::vector<std::shared_ptr<Port>> out_conns_;
 
         // Port characteristics
         std::string name_;
@@ -42,5 +68,8 @@ namespace ControlBlock
 
         // Value
         Eigen::VectorXd val_;
+
+        // Parent block
+        int parent_id_;
     };
 } // namespace ControlBlock

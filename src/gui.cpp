@@ -41,8 +41,9 @@ void Gui::Init()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_WindowFlags window_flags =
+        (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
+                          SDL_WINDOW_ALLOW_HIGHDPI);
     window = SDL_CreateWindow("Control Simulation", SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     gl_context = SDL_GL_CreateContext(window);
@@ -96,7 +97,7 @@ void Gui::Update()
     this->Toolbar();
 
     // Show the diagram
-    diagram_.Update();
+    diagram_.Update(gui_data_);
 }
 
 void Gui::Render()
@@ -121,7 +122,7 @@ void Gui::Stop()
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
-    NodeEditorShutdown();
+
     ImNodes::DestroyContext();
     ImGui::DestroyContext();
 
@@ -154,16 +155,36 @@ void Gui::Toolbar()
     ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + height));
     ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 50));
-
     ImGuiWindowFlags window_flags =
         0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoSavedSettings;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+
+    // Begin the toolbar
     ImGui::Begin("TOOLBAR", NULL, window_flags);
     ImGui::PopStyleVar();
 
-    ImGui::Button("Toolbar goes here", ImVec2(0, 37));
+    ImGui::Button("Run", ImVec2(0, 37));
+    ImGui::SameLine();
+    ImGui::Button("Pause", ImVec2(0, 37));
+    ImGui::SameLine();
+    ImGui::Button("Stop", ImVec2(0, 37));
+
+    // Timing
+    ImGui::SameLine();
+    ImGui::BeginGroup();
+    ImGui::TextUnformatted("tf:");
+    ImGui::SameLine();
+    ImGui::PushItemWidth(75.0);
+    ImGui::InputScalar("tf", ImGuiDataType_Double, &gui_data_.sim_time, NULL);
+
+    // ImGui::SameLine();
+    ImGui::TextUnformatted("dt:");
+    ImGui::SameLine();
+    ImGui::PushItemWidth(75.0);
+    ImGui::InputScalar("dt", ImGuiDataType_Double, &gui_data_.dt, NULL);
+    ImGui::EndGroup();
 
     ImGui::End();
 }
