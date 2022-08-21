@@ -47,6 +47,14 @@ namespace ControlBlock
         }
     }
 
+    void Block::SetInitial()
+    {
+        /**
+         * @brief Implement this in a sub-block to allow for initial conditions.
+         */
+        // TODO: consider disconnected initial condition blocks to be ready?
+    }
+
     void Block::Compute()
     {
         /**
@@ -94,6 +102,19 @@ namespace ControlBlock
         }
 
         ImNodes::EndNode();
+    }
+
+    bool Block::IsReady()
+    {
+        // If all the input ports are ready, then this block is ready to
+        // compute.
+        bool ready = true;
+        for (size_t i = 0; i < inputs_.size(); ++i)
+        {
+            ready &= inputs_[i]->IsReady();
+        }
+
+        return ready;
     }
 
     int Block::GetId() { return this->id_; }

@@ -19,12 +19,17 @@ namespace ControlBlock
     {
     public:
         Block(Diagram &diagram) : diagram_(diagram) {}
+        ~Block() {}
 
         void Init(std::string block_name, std::vector<std::string> input_names,
                   std::vector<std::string> output_names);
         void Broadcast();
+        virtual void SetInitial();
         virtual void Compute();
         virtual void Render();
+
+        // Computation
+        bool IsReady();
 
         // Block characteristics
         int GetId();

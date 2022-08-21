@@ -17,6 +17,7 @@ namespace ControlBlock
             : diagram_(d), from_id_(from_id), to_id_(to_id)
         {
         }
+        ~Wire() {}
 
         void Init();
         void Render();

@@ -165,11 +165,11 @@ void Gui::Toolbar()
     ImGui::Begin("TOOLBAR", NULL, window_flags);
     ImGui::PopStyleVar();
 
-    ImGui::Button("Run", ImVec2(0, 37));
+    gui_data_.start = ImGui::Button("Run", ImVec2(0, 37));
     ImGui::SameLine();
-    ImGui::Button("Pause", ImVec2(0, 37));
+    gui_data_.pause = ImGui::Button("Pause", ImVec2(0, 37));
     ImGui::SameLine();
-    ImGui::Button("Stop", ImVec2(0, 37));
+    gui_data_.stop = ImGui::Button("Stop", ImVec2(0, 37));
 
     // Timing
     ImGui::SameLine();
@@ -179,12 +179,15 @@ void Gui::Toolbar()
     ImGui::PushItemWidth(75.0);
     ImGui::InputScalar("tf", ImGuiDataType_Double, &gui_data_.sim_time, NULL);
 
-    // ImGui::SameLine();
     ImGui::TextUnformatted("dt:");
     ImGui::SameLine();
     ImGui::PushItemWidth(75.0);
     ImGui::InputScalar("dt", ImGuiDataType_Double, &gui_data_.dt, NULL);
     ImGui::EndGroup();
+
+    // Show simulation time
+    ImGui::SameLine();
+    ImGui::Text("%s: %f", "Simulation Time", diagram_.GetTime());
 
     ImGui::End();
 }

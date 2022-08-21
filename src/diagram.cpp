@@ -9,10 +9,44 @@ void Diagram::Init()
 
 void Diagram::Update(GuiData &gui_data)
 {
+    // Handle GUI events
+    if (gui_data.start && !sim_running_)
+    {
+        // Reset the simulation if the simulator wasn't previously paused.
+        if (!sim_paused_)
+        {
+            this->InitSim();
+        }
+
+        // Set the simulation to running.
+        sim_paused_ = false;
+        sim_running_ = true;
+    }
+    if (gui_data.pause && sim_running_)
+    {
+        // Set the sim to be paused
+        sim_paused_ = true;
+        sim_running_ = false;
+    }
+    if (gui_data.stop)
+    {
+        // Stop the simulator.
+        // The next start will re-initialize the diagram.
+        sim_running_ = false;
+        sim_paused_ = false;
+    }
+
     // Run the simulation if it is active
     if (sim_running_)
     {
         this->Compute();
+    }
+    else if (!sim_running_ && !sim_paused_)
+    {
+        // Allow simulation parameters to be changed when the simulation is
+        // stopped.
+        dt_ = gui_data.dt;
+        tf_ = gui_data.sim_time;
     }
 
     // Show the diagram
@@ -42,6 +76,8 @@ void Diagram::Update(GuiData &gui_data)
         this->EditWires();
     }
 }
+
+double Diagram::GetTime() { return clk_.GetTime(); }
 
 int Diagram::AddItem()
 {
@@ -93,7 +129,89 @@ void Diagram::AddWire(int from, int to)
     }
 }
 
-void Diagram::Compute() {}
+void Diagram::InitSim()
+{
+    // Reset the time
+    clk_.InitClock(dt_);
+
+    // Initialize all blocks that have an internal state.
+    for (std::shared_ptr<ControlBlock::Block> blk : blocks_)
+    {
+        blk->SetInitial();
+    }
+}
+
+void Diagram::Compute()
+{
+    // Track if no blocks are ready at all.
+    bool no_blocks_ready = false;
+
+    // Track blocks that need to be called
+    std::vector<std::shared_ptr<ControlBlock::Block>> blocks_to_call = blocks_;
+
+    // Empty list of blocks already called
+    std::vector<std::shared_ptr<ControlBlock::Block>> called_blocks;
+
+    // Run a cycle of computation by giving each block a chance to run.
+    while (blocks_to_call.size() > 0 && !no_blocks_ready)
+    {
+        // // Call Compute() for all blocks that are ready that haven't been
+        // called this time cycle.
+        int i = 0;
+        while (i < blocks_to_call.size())
+        {
+            // Get the block
+            std::shared_ptr<ControlBlock::Block> blk = blocks_to_call[i];
+            std::cout << "Checking " << blk->GetName() << std::endl;
+
+            // Call Compute() if the block is ready.
+            if (blk->IsReady())
+            {
+                std::cout << "-> Running\n";
+                blk->Compute();
+
+                // Move the block to the called list
+                called_blocks.push_back(blk);
+
+                std::cout << "-> Removing from queue\n";
+                // Remove this block from the queue.
+                std::vector<std::shared_ptr<ControlBlock::Block>>::iterator
+                    iter = blocks_to_call.begin() + i;
+                blocks_to_call.erase(iter);
+            }
+            else
+            {
+                // Increment the index if the block wasn't ready
+                ++i;
+            }
+        }
+        std::cout << "All blocks run!\n";
+
+        // Ensure at least one block is ready to run (if not, then all remaining
+        // blocks are disconnected)
+        no_blocks_ready = true;
+        for (size_t i = 0; i < blocks_to_call.size(); ++i)
+        {
+            if (blocks_to_call[i]->IsReady())
+            {
+                no_blocks_ready = false;
+                break;
+            }
+        }
+    }
+
+    std::cout << "Time update\n";
+
+    // Increment clock for this cycle
+    clk_.Increment();
+
+    // Stop the simulation if the time limit is exceeded.
+    if (clk_.GetTime() >= tf_)
+    {
+        sim_paused_ = false;
+        sim_running_ = false;
+    }
+}
 
 void Diagram::Render()
 {
@@ -113,13 +231,14 @@ void Diagram::Render()
 void Diagram::EditWires()
 {
     // Detect wire creations
-    // TODO: validation
     int start_attr, end_attr;
     if (ImNodes::IsLinkCreated(&start_attr, &end_attr))
     {
         // Register a new wire
         this->AddWire(start_attr, end_attr);
     }
+
+    // TODO: detect wire deletion
 }
 
 void Diagram::AddBlockPopup()

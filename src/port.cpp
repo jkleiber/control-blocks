@@ -38,7 +38,15 @@ namespace ControlBlock
 
     bool Port::ConnectedInput() { return (in_conn_ != nullptr); }
 
-    Eigen::VectorXd Port::GetValue() { return val_; }
+    Eigen::VectorXd Port::GetValue()
+    {
+        // Since the port value is being read, the port will need to Receive()
+        // again before the value is "ready" (fresh).
+        ready_ = false;
+        return val_;
+    }
+
+    bool Port::IsReady() { return ready_; }
 
     void Port::SetValue(Eigen::VectorXd val)
     {
@@ -51,6 +59,7 @@ namespace ControlBlock
 
     void Port::Broadcast()
     {
+        std::cout << "Out connections size: " << out_conns_.size() << std::endl;
         // Send values to any attached ports
         for (size_t i = 0; i < out_conns_.size(); ++i)
         {
@@ -65,6 +74,7 @@ namespace ControlBlock
         if (this->type_ == INPUT_PORT && caller == *in_conn_.get())
         {
             val_ = val;
+            ready_ = true;
         }
     }
 

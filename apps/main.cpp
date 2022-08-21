@@ -32,6 +32,12 @@ int main(int argc, char **argv)
             done = true;
             break;
         }
+        catch (const std::exception &exc)
+        {
+            // catch anything thrown within try block that derives from
+            // std::exception
+            std::cerr << exc.what();
+        }
 
         // Render GUI
         gui->Render();

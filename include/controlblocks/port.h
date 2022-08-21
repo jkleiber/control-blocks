@@ -2,6 +2,7 @@
 #pragma once
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -46,6 +47,7 @@ namespace ControlBlock
 
         // Inputs
         Eigen::VectorXd GetValue();
+        bool IsReady();
 
         // Outputs
         void Broadcast();
@@ -68,6 +70,9 @@ namespace ControlBlock
 
         // Value
         Eigen::VectorXd val_;
+
+        // If the value is fresh
+        bool ready_;
 
         // Parent block
         int parent_id_;

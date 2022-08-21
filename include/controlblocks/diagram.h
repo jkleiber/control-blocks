@@ -12,6 +12,7 @@
 #include "controlblocks/block.h"
 #include "controlblocks/gui_data.h"
 #include "controlblocks/port.h"
+#include "controlblocks/sim_clock.h"
 #include "controlblocks/wire.h"
 
 // Block types
@@ -32,7 +33,7 @@ class Diagram
 {
 
 public:
-    Diagram() : num_items_(0), sim_running_(false) {}
+    Diagram() : num_items_(0), sim_running_(false), sim_paused_(false) {}
     ~Diagram() {}
 
     Diagram(const Diagram &diagram)
@@ -45,6 +46,13 @@ public:
 
     void Init();
     void Update(GuiData &gui_data);
+
+    /**
+     * @brief Get the simulation time
+     *
+     * @return double Simulation time
+     */
+    double GetTime();
 
     int AddItem();
 
@@ -79,8 +87,15 @@ private:
 
     // Simulation tracking
     bool sim_running_;
+    bool sim_paused_;
+
+    // Simulation timing
+    double dt_;
+    double tf_;
+    SimClock clk_;
 
     // Diagram simulation
+    void InitSim();
     void Compute();
 
     // Diagram rendering

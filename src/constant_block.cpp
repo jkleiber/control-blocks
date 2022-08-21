@@ -17,8 +17,8 @@ namespace ControlBlock
 
     void ConstantBlock::Compute()
     {
-        Eigen::VectorXd output;
-        output << val_;
+        Eigen::VectorXd output = Eigen::VectorXd::Zero(1);
+        output(0) = val_;
         Block::SetOutput(output_port_name_, output);
         Block::Broadcast();
     }
