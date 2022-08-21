@@ -24,9 +24,11 @@ namespace ControlBlock
         void Init(std::string block_name, std::vector<std::string> input_names,
                   std::vector<std::string> output_names);
         void Broadcast();
-        virtual void SetInitial();
+        virtual void ApplyInitial();
+        virtual void SetInitial(Eigen::VectorXd x0);
         virtual void Compute();
         virtual void Render();
+        virtual void Settings();
 
         // Computation
         bool IsReady();

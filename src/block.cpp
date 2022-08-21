@@ -47,10 +47,19 @@ namespace ControlBlock
         }
     }
 
-    void Block::SetInitial()
+    void Block::ApplyInitial()
     {
         /**
-         * @brief Implement this in a sub-block to allow for initial conditions.
+         * @brief Implement this in a sub-block to have an initialization
+         * routine.
+         */
+    }
+
+    void Block::SetInitial(Eigen::VectorXd x0)
+    {
+        /**
+         * @brief Implement this in a sub-block to set internal block initial
+         * conditions.
          */
         // TODO: consider disconnected initial condition blocks to be ready?
     }
@@ -69,8 +78,12 @@ namespace ControlBlock
          * @brief Implement Render() in each sub-block to get different behavior
          */
 
-        const float node_width = 100.f;
+        const float min_node_width = 100.f;
         ImNodes::BeginNode(this->id_);
+
+        float node_width =
+            std::max(min_node_width, ImGui::CalcTextSize(name_.c_str()).x);
+        ImGui::PushItemWidth(node_width);
 
         // Allow the block name to be changed
         ImNodes::BeginNodeTitleBar();
@@ -80,28 +93,42 @@ namespace ControlBlock
         this->name_ = name_str;
         ImNodes::EndNodeTitleBar();
 
+        // Input group
+        ImGui::BeginGroup();
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
             ImNodes::BeginInputAttribute(input_ids_[i]);
-            ImGui::TextUnformatted(inputs_[i]->GetName().c_str());
+            std::string in_name = "in" + std::to_string(i);
+            ImGui::TextUnformatted(in_name.c_str());
             ImNodes::EndInputAttribute();
         }
+        ImGui::EndGroup();
 
-        ImGui::Spacing();
+        ImGui::SameLine();
 
+        // Output group
+        ImGui::BeginGroup();
         for (size_t i = 0; i < outputs_.size(); ++i)
         {
             int idx = static_cast<int>(i);
 
             ImNodes::BeginOutputAttribute(output_ids_[i]);
-            const float label_width =
-                ImGui::CalcTextSize(outputs_[i]->GetName().c_str()).x;
+            std::string out_name = "out" + std::to_string(i);
+            const float label_width = ImGui::CalcTextSize(out_name.c_str()).x;
             ImGui::Indent(node_width - label_width);
-            ImGui::TextUnformatted(outputs_[i]->GetName().c_str());
+            ImGui::TextUnformatted(out_name.c_str());
             ImNodes::EndOutputAttribute();
         }
+        ImGui::EndGroup();
 
         ImNodes::EndNode();
+    }
+
+    void Block::Settings()
+    {
+        /**
+         * @brief Implement this in sub-blocks to provide a settings menu.
+         */
     }
 
     bool Block::IsReady()

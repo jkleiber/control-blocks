@@ -14,7 +14,18 @@ namespace ControlBlock
         std::vector<std::string> output_name = {output_port_name_};
 
         Block::Init(block_name, input_name, output_name);
+
+        // Set x0 to a 1x1 zero vector
+        x0_ = Eigen::VectorXd::Zero(1);
     }
+
+    void GainBlock::ApplyInitial()
+    {
+        Block::SetOutput(output_port_name_, x0_);
+        Block::Broadcast();
+    }
+
+    void GainBlock::SetInitial(Eigen::VectorXd x0) { x0_ = x0; }
 
     void GainBlock::Compute()
     {
@@ -50,16 +61,20 @@ namespace ControlBlock
         ImNodes::EndNodeTitleBar();
 
         // Input
+        ImGui::BeginGroup();
         ImNodes::BeginInputAttribute(input_ids_[0]);
-        // ImGui::TextUnformatted(inputs_[i].GetName().c_str());
+        ImGui::TextUnformatted("K");
         ImNodes::EndInputAttribute();
+        ImGui::EndGroup();
 
-        ImGui::Spacing();
+        ImGui::SameLine();
 
         // Output
+        ImGui::BeginGroup();
         ImNodes::BeginOutputAttribute(output_ids_[0]);
         ImGui::InputScalar("", ImGuiDataType_Double, &val_, NULL);
         ImNodes::EndOutputAttribute();
+        ImGui::EndGroup();
 
         // Reset item width for the next block.
         ImGui::PopItemWidth();

@@ -19,11 +19,14 @@ namespace ControlBlock
         }
 
         void Init(std::string block_name = "Gain");
-        void Compute();
+        void ApplyInitial() override;
+        void SetInitial(Eigen::VectorXd x0) override;
+        void Compute() override;
         void Render() override;
 
     private:
         double val_;
+        Eigen::VectorXd x0_;
 
         std::string input_port_name_;
         std::string output_port_name_;

@@ -70,10 +70,15 @@ void Diagram::Update(GuiData &gui_data)
     ImNodes::EndNodeEditor();
     ImGui::End();
 
-    // Add / Remove new wires to the diagram if the simulation is not active
-    if (!sim_running_)
+    // Enable edits outside of the ImNodes context
+    if (!sim_running_ && !sim_paused_)
     {
+        // Add / Remove new wires to the diagram if the simulation is not active
         this->EditWires();
+
+        // Allow blocks to have settings edited when the simulation isn't
+        // running
+        this->EditSettings();
     }
 }
 
@@ -137,7 +142,7 @@ void Diagram::InitSim()
     // Initialize all blocks that have an internal state.
     for (std::shared_ptr<ControlBlock::Block> blk : blocks_)
     {
-        blk->SetInitial();
+        blk->ApplyInitial();
     }
 }
 
@@ -162,18 +167,18 @@ void Diagram::Compute()
         {
             // Get the block
             std::shared_ptr<ControlBlock::Block> blk = blocks_to_call[i];
-            std::cout << "Checking " << blk->GetName() << std::endl;
+            // std::cout << "Checking " << blk->GetName() << std::endl;
 
             // Call Compute() if the block is ready.
             if (blk->IsReady())
             {
-                std::cout << "-> Running\n";
+                // std::cout << "-> Running\n";
                 blk->Compute();
 
                 // Move the block to the called list
                 called_blocks.push_back(blk);
 
-                std::cout << "-> Removing from queue\n";
+                // std::cout << "-> Removing from queue\n";
                 // Remove this block from the queue.
                 std::vector<std::shared_ptr<ControlBlock::Block>>::iterator
                     iter = blocks_to_call.begin() + i;
@@ -241,6 +246,14 @@ void Diagram::EditWires()
     // TODO: detect wire deletion
 }
 
+void Diagram::EditSettings()
+{
+    for (size_t i = 0; i < blocks_.size(); ++i)
+    {
+        blocks_[i]->Settings();
+    }
+}
+
 void Diagram::AddBlockPopup()
 {
     // Open the block adder popup with a right click
@@ -276,6 +289,14 @@ void Diagram::AddBlockPopup()
         {
             // Register new display block
             this->AddBlock<ControlBlock::DisplayBlock>(click_pos);
+        }
+        else if (ImGui::MenuItem("Sum"))
+        {
+            this->AddBlock<ControlBlock::SumBlock>(click_pos);
+        }
+        else if (ImGui::MenuItem("Mux"))
+        {
+            this->AddBlock<ControlBlock::MuxBlock>(click_pos);
         }
 
         ImGui::EndPopup(); // end "Add Block"

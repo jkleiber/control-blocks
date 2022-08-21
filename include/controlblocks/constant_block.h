@@ -19,7 +19,7 @@ namespace ControlBlock
         }
 
         void Init(std::string block_name = "Constant");
-        void Compute();
+        void Compute() override;
         void Render() override;
 
     private:

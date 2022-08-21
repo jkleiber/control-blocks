@@ -19,6 +19,8 @@
 #include "controlblocks/constant_block.h"
 #include "controlblocks/display_block.h"
 #include "controlblocks/gain_block.h"
+#include "controlblocks/mux_block.h"
+#include "controlblocks/sum_block.h"
 
 typedef struct block_types_t
 {
@@ -102,6 +104,7 @@ private:
     void Render();
     void AddBlockPopup();
     void EditWires();
+    void EditSettings();
 
     // Block searching
     std::shared_ptr<ControlBlock::Port> GetPortByImNodesId(int id);

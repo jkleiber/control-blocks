@@ -59,7 +59,6 @@ namespace ControlBlock
 
     void Port::Broadcast()
     {
-        std::cout << "Out connections size: " << out_conns_.size() << std::endl;
         // Send values to any attached ports
         for (size_t i = 0; i < out_conns_.size(); ++i)
         {
