@@ -27,7 +27,7 @@ namespace ControlBlock
     private:
         int num_mux_inputs;
 
-        std::string input1_, input2_;
+        std::vector<std::string> input_names_;
         std::string output_port_name_;
 
         const float min_node_width_;

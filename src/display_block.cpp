@@ -44,6 +44,7 @@ namespace ControlBlock
         // Input
         ImNodes::BeginInputAttribute(input_ids_[0]);
         // ImGui::TextUnformatted(inputs_[i].GetName().c_str());
+        ImGui::TextUnformatted(" ");
         ImNodes::EndInputAttribute();
 
         // Print each value in a new line.

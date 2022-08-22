@@ -190,7 +190,7 @@ void Diagram::Compute()
                 ++i;
             }
         }
-        std::cout << "All blocks run!\n";
+        // std::cout << "All blocks run!\n";
 
         // Ensure at least one block is ready to run (if not, then all remaining
         // blocks are disconnected)
@@ -205,7 +205,7 @@ void Diagram::Compute()
         }
     }
 
-    std::cout << "Time update\n";
+    // std::cout << "Time update\n";
 
     // Increment clock for this cycle
     clk_.Increment();

@@ -1,4 +1,5 @@
 #include "controlblocks/mux_block.h"
+#include "controlblocks/diagram.h"
 
 namespace ControlBlock
 {
@@ -6,26 +7,45 @@ namespace ControlBlock
     void MuxBlock::Init(std::string block_name)
     {
         // Port names
-        input1_ = block_name + "_in1";
-        input2_ = block_name + "_in2";
+        std::string input1_ = block_name + "_in1";
+        std::string input2_ = block_name + "_in2";
         output_port_name_ = block_name + "_mux";
 
         // Initialize the block with a single output and no inputs
-        std::vector<std::string> input_name = {input1_, input2_};
+        input_names_ = {input1_, input2_};
         std::vector<std::string> output_name = {output_port_name_};
 
-        Block::Init(block_name, input_name, output_name);
+        Block::Init(block_name, input_names_, output_name);
     }
 
     void MuxBlock::Compute()
     {
-        // Get the input
-        Eigen::VectorXd val1 = Block::GetInput(input1_);
-        Eigen::VectorXd val2 = Block::GetInput(input2_);
+        // Maintain a vector of Eigen::VectorXds
+        std::vector<Eigen::VectorXd> input_vals;
+
+        // Track the size
+        int total_size = 0;
+
+        for (size_t i = 0; i < input_names_.size(); ++i)
+        {
+            // Get the i-th input
+            Eigen::VectorXd val_i = Block::GetInput(input_names_[i]);
+
+            // Sum up the sizes
+            total_size += val_i.size();
+
+            // Save the input
+            input_vals.push_back(val_i);
+        }
 
         // Stack the vectors
-        Eigen::VectorXd output(val1.size() + val2.size());
-        output << val1, val2;
+        Eigen::VectorXd output = Eigen::VectorXd::Zero(total_size);
+        int idx = 0;
+        for (size_t i = 0; i < input_vals.size(); ++i)
+        {
+            output.segment(idx, input_vals[i].size()) = input_vals[i];
+            idx += input_vals[i].size();
+        }
 
         // Send the output
         Block::SetOutput(output_port_name_, output);
@@ -52,8 +72,9 @@ namespace ControlBlock
         ImGui::BeginGroup();
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
+            std::string pin_name = "in" + std::to_string(i);
             ImNodes::BeginInputAttribute(input_ids_[i]);
-            ImGui::TextUnformatted("+");
+            ImGui::TextUnformatted(pin_name.c_str());
             ImNodes::EndInputAttribute();
         }
         ImGui::EndGroup();
@@ -86,7 +107,31 @@ namespace ControlBlock
             ImGui::Begin(setting_name.c_str(), &is_open);
             if (settings_open_)
             {
+                // Modify number of inputs
                 ImGui::InputInt("# inputs", &num_mux_inputs);
+                if (num_mux_inputs < inputs_.size())
+                {
+                }
+                else if (num_mux_inputs > inputs_.size())
+                {
+                    for (int i = 0; i < (num_mux_inputs - inputs_.size()); ++i)
+                    {
+                        // Get new ID from the diagram
+                        int new_id = diagram_.AddItem();
+
+                        // Create new input port
+                        std::string new_port_name =
+                            this->name_ + "_in" +
+                            std::to_string(inputs_.size());
+                        std::shared_ptr<Port> new_port = std::make_shared<Port>(
+                            new_port_name, PortType::INPUT_PORT, this->id_);
+
+                        // Add port info to lists
+                        inputs_.push_back(new_port);
+                        input_ids_.push_back(new_id);
+                        input_names_.push_back(new_port_name);
+                    }
+                }
             }
             ImGui::End();
 

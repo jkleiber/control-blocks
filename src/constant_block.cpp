@@ -48,6 +48,7 @@ namespace ControlBlock
             int idx = static_cast<int>(i);
 
             ImNodes::BeginOutputAttribute(output_ids_[i]);
+            ImGui::TextUnformatted(" ");
             ImGui::InputScalar("", ImGuiDataType_Double, &val_, NULL);
             ImNodes::EndOutputAttribute();
         }
