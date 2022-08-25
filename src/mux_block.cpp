@@ -107,14 +107,40 @@ namespace ControlBlock
             ImGui::Begin(setting_name.c_str(), &is_open);
             if (settings_open_)
             {
+                // Set the focus to the settings so the window isn't hidden.
+                ImGui::SetWindowFocus();
                 // Modify number of inputs
                 ImGui::InputInt("# inputs", &num_mux_inputs);
-                if (num_mux_inputs < inputs_.size())
+
+                // The mux must have at least one input.
+                if (num_mux_inputs < 1)
                 {
+                    num_mux_inputs = 1;
                 }
-                else if (num_mux_inputs > inputs_.size())
+
+                // Current size of the input ports pre-modification.
+                int original_size = inputs_.size();
+
+                if (num_mux_inputs < original_size)
                 {
-                    for (int i = 0; i < (num_mux_inputs - inputs_.size()); ++i)
+                    for (int i = 0; i < (original_size - num_mux_inputs); ++i)
+                    {
+                        // Get the last port ID
+                        int id = input_ids_[original_size - 1 - i];
+
+                        // Remove the port from the diagram to free the ImNodes
+                        // ID and clear all the connections.
+                        diagram_.RemovePort(id, inputs_[original_size - 1 - i]);
+
+                        // Remove the port from this block's lists.
+                        input_ids_.pop_back();
+                        input_names_.pop_back();
+                        inputs_.pop_back();
+                    }
+                }
+                else if (num_mux_inputs > original_size)
+                {
+                    for (int i = 0; i < (num_mux_inputs - original_size); ++i)
                     {
                         // Get new ID from the diagram
                         int new_id = diagram_.AddItem();

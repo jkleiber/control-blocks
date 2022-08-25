@@ -63,7 +63,6 @@ namespace ControlBlock
         // Input
         ImGui::BeginGroup();
         ImNodes::BeginInputAttribute(input_ids_[0]);
-        ImGui::TextUnformatted("K");
         ImNodes::EndInputAttribute();
         ImGui::EndGroup();
 

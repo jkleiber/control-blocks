@@ -17,6 +17,7 @@ namespace ControlBlock
 {
     class Block
     {
+
     public:
         Block(Diagram &diagram) : diagram_(diagram) {}
         ~Block() {}
@@ -48,6 +49,8 @@ namespace ControlBlock
         std::shared_ptr<Port> GetOutputPort(int index);
         int GetOutputPortId(int index);
         std::shared_ptr<Port> FindOutputPortByImNodesId(int imnode_id);
+
+        void RemoveConnectedPort(std::shared_ptr<Port> port);
 
         // Inputs
         Eigen::VectorXd GetInput(std::string port_name);

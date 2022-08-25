@@ -56,7 +56,28 @@ public:
      */
     double GetTime();
 
+    /**
+     * @brief Add an element to the ImGui canvas with a unique ID
+     *
+     * @return int Unique ID to add to the canvas
+     */
     int AddItem();
+
+    /**
+     * @brief Remove an element from the canvas with a given ID. Save that ID
+     * for future reassignment.
+     * Note: The actual deletion of this element must be handled by the caller.
+     *
+     * @param id ID to remove
+     */
+    void RemoveItem(int id);
+
+    /**
+     * @brief Remove a port based on its ImGui ID. Calls RemoveItem()
+     *
+     * @param id ID to remove.
+     */
+    void RemovePort(int id, std::shared_ptr<ControlBlock::Port> port_to_remove);
 
     /**
      * @brief Create and register a new block with the diagram
@@ -80,12 +101,16 @@ public:
 
     void AddWire(int from, int to);
 
+    // Save / Load / New
+    void ClearDiagram();
+
 private:
     std::vector<std::shared_ptr<ControlBlock::Block>> blocks_;
     std::vector<std::shared_ptr<ControlBlock::Wire>> wires_;
 
     // ID tracking
     int num_items_;
+    std::vector<int> available_ids_;
 
     // Simulation tracking
     bool sim_running_;

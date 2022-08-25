@@ -42,16 +42,20 @@ namespace ControlBlock
         ImNodes::EndNodeTitleBar();
 
         // Input
+        ImGui::BeginGroup();
         ImNodes::BeginInputAttribute(input_ids_[0]);
-        // ImGui::TextUnformatted(inputs_[i].GetName().c_str());
-        ImGui::TextUnformatted(" ");
         ImNodes::EndInputAttribute();
+        ImGui::SameLine();
 
         // Print each value in a new line.
+        ImGui::BeginGroup();
         for (int i = 0; i < val_.size(); ++i)
         {
             ImGui::Text(std::to_string(val_(i)).c_str());
         }
+        ImGui::EndGroup();
+
+        ImGui::EndGroup();
 
         ImGui::Spacing();
 

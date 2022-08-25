@@ -235,6 +235,31 @@ namespace ControlBlock
         return nullptr;
     }
 
+    void Block::RemoveConnectedPort(std::shared_ptr<Port> port_to_remove)
+    {
+        // Detect if this port is an input port so the port list can be
+        // optimized (only need to explore ports of a different type).
+        PortType remove_type = port_to_remove->GetType();
+
+        std::vector<std::shared_ptr<Port>> ports_to_check;
+        if (remove_type == PortType::INPUT_PORT)
+        {
+            // Go through all output ports in this block and remove.
+            for (int i = 0; i < outputs_.size(); ++i)
+            {
+                outputs_[i]->RemoveConnection(port_to_remove);
+            }
+        }
+        else
+        {
+            // Go through all input ports in this block and remove.
+            for (int i = 0; i < inputs_.size(); ++i)
+            {
+                inputs_[i]->RemoveConnection(port_to_remove);
+            }
+        }
+    }
+
     Eigen::VectorXd Block::GetInput(std::string port_name)
     {
         // Collect the input from the correct port.

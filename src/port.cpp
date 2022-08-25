@@ -62,6 +62,16 @@ namespace ControlBlock
         // Send values to any attached ports
         for (size_t i = 0; i < out_conns_.size(); ++i)
         {
+            // If the connection is a nullptr, delete it and skip it.
+            // i-- used to ensure the next item isn't skipped.
+            if (out_conns_[i] == nullptr)
+            {
+                out_conns_.erase(out_conns_.begin() + i);
+                i--;
+                continue;
+            }
+
+            // Make the connected ports receive this.
             out_conns_[i]->Receive(val_, *this);
         }
     }

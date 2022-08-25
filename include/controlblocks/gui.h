@@ -1,7 +1,10 @@
 
 #pragma once
 
+#include <fstream>
+#include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -15,9 +18,9 @@
 #include <SDL_opengl.h>
 #endif
 
+#include "controlblocks/block.h"
 #include "controlblocks/diagram.h"
 #include "controlblocks/gui_data.h"
-
 
 class Gui
 {
@@ -41,4 +44,7 @@ private:
 
     void Menubar();
     void Toolbar();
+
+    void SaveDiagram();
+    void LoadDiagram();
 };

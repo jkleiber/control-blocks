@@ -4,7 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/third_party/imnodes"
+                "${workspaceFolder}/third_party/imnodes",
+                "${workspaceFolder}/third_party/bitsery",
+                "${workspaceFolder}/third_party/bitsery/include"
             ],
             "defines": [
                 "_DEBUG",

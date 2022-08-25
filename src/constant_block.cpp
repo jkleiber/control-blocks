@@ -49,6 +49,7 @@ namespace ControlBlock
 
             ImNodes::BeginOutputAttribute(output_ids_[i]);
             ImGui::TextUnformatted(" ");
+            ImGui::SameLine();
             ImGui::InputScalar("", ImGuiDataType_Double, &val_, NULL);
             ImNodes::EndOutputAttribute();
         }

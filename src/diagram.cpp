@@ -86,10 +86,52 @@ double Diagram::GetTime() { return clk_.GetTime(); }
 
 int Diagram::AddItem()
 {
-    // Save the current available ID and increment.
+    // Default behavior is to use the next available number, counting up from 0.
     int id = num_items_;
+
+    // If there are previously allocated IDs that are now available, use the
+    // most recently freed ID off the stack.
+    if (available_ids_.size() > 0)
+    {
+        id = available_ids_[available_ids_.size() - 1];
+        available_ids_.pop_back();
+        return id;
+    }
+
+    // Otherwise just keep the default and increment to the next ID.
     num_items_ += 1;
     return id;
+}
+
+void Diagram::RemoveItem(int id)
+{
+    // Add the ID to the list of available IDs for AddItem() to use
+    available_ids_.push_back(id);
+}
+
+void Diagram::RemovePort(int imnode_id,
+                         std::shared_ptr<ControlBlock::Port> port)
+{
+    // Free the ID for future use.
+    RemoveItem(imnode_id);
+
+    // Go through each wire and remove if it is connected to this port ID
+    for (int i = 0; i < wires_.size(); ++i)
+    {
+        // Remove the wires that have connections to this ID.
+        if (wires_[i]->GetFromId() == imnode_id ||
+            wires_[i]->GetToId() == imnode_id)
+        {
+            wires_.erase(wires_.begin() + i);
+            i--;
+        }
+    }
+
+    // Go through each block and remove the port connection if it has one.
+    for (int i = 0; i < blocks_.size(); ++i)
+    {
+        blocks_[i]->RemoveConnectedPort(port);
+    }
 }
 
 void Diagram::AddWire(int from, int to)
@@ -132,6 +174,14 @@ void Diagram::AddWire(int from, int to)
             wires_.push_back(wire);
         }
     }
+}
+
+void Diagram::ClearDiagram()
+{
+    this->blocks_.clear();
+    this->wires_.clear();
+    this->available_ids_.clear();
+    this->num_items_ = 0;
 }
 
 void Diagram::InitSim()
