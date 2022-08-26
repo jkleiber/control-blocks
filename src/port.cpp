@@ -90,9 +90,47 @@ namespace ControlBlock
     std::string Port::GetName() { return this->name_; }
     PortType Port::GetType() { return this->type_; }
     int Port::GetParentId() { return this->parent_id_; }
+    int Port::GetId() { return this->id_; }
+
+    toml::table Port::Serialize()
+    {
+        std::cout << "-- Serializing port: " << this->name_ << std::endl;
+
+        // Get the connection ids so there doesn't have to be some deepcopy
+        toml::array conns{};
+
+        if (this->type_ == INPUT_PORT)
+        {
+            // Get the input
+            if (in_conn_ != nullptr)
+            {
+                conns.push_back(this->in_conn_->GetId());
+            }
+        }
+        else
+        {
+            // Get the output connections
+            for (int i = 0; i < out_conns_.size(); ++i)
+            {
+                conns.push_back(this->out_conns_[i]->GetId());
+            }
+        }
+
+        int port_type = static_cast<int>(type_);
+
+        // Make the table
+        toml::table tbl = toml::table{{"id", this->id_},
+                                      {"name", this->name_},
+                                      {"parent_id", this->parent_id_},
+                                      {"type", port_type},
+                                      {"conns", conns}};
+
+        return tbl;
+    }
 
     void Port::operator=(Port &p)
     {
+        this->id_ = p.id_;
         this->name_ = p.name_;
         this->type_ = p.type_;
         this->in_conn_ = p.in_conn_;
@@ -102,6 +140,7 @@ namespace ControlBlock
     bool Port::operator==(const Port &a) const
     {
         bool is_equal = true;
+        is_equal &= this->id_ == a.id_;
         is_equal &= this->name_ == a.name_;
         is_equal &= this->type_ == a.type_;
         is_equal &= this->in_conn_ == a.in_conn_;

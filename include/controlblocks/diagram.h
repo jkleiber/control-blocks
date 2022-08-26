@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <fstream>
 #include <memory>
 
 #include "imgui.h"
@@ -8,6 +9,7 @@
 #include "imgui_impl_sdl.h"
 #include "imnodes.h"
 #include "implot.h"
+#include "toml++/toml.h"
 
 #include "controlblocks/block.h"
 #include "controlblocks/gui_data.h"
@@ -102,6 +104,7 @@ public:
     void AddWire(int from, int to);
 
     // Save / Load / New
+    void SaveDiagram(std::string filename);
     void ClearDiagram();
 
 private:

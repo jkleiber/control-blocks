@@ -176,6 +176,27 @@ void Diagram::AddWire(int from, int to)
     }
 }
 
+void Diagram::SaveDiagram(std::string filename)
+{
+    // Go through each block and create a TOML array.
+    toml::array blocks_array;
+    for (int i = 0; i < blocks_.size(); ++i)
+    {
+        toml::table tbl_i = blocks_[i]->Serialize();
+        blocks_array.push_back(tbl_i);
+    }
+
+    std::cout << "Diagram serialization done\n";
+
+    toml::table diagram_table = toml::table{{"diagram", blocks_array}};
+
+    // Output the table to the file.
+    std::ofstream file;
+    file.open(filename, std::ofstream::out | std::ofstream::trunc);
+    file << diagram_table << std::flush;
+    file.close();
+}
+
 void Diagram::ClearDiagram()
 {
     this->blocks_.clear();

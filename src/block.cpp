@@ -17,10 +17,11 @@ namespace ControlBlock
         // Create input ports
         for (size_t i = 0; i < input_names.size(); ++i)
         {
+            int port_id = diagram_.AddItem();
             std::shared_ptr<Port> p = std::make_shared<Port>(
-                input_names[i], PortType::INPUT_PORT, id_);
+                port_id, input_names[i], PortType::INPUT_PORT, id_);
             inputs_.push_back(p);
-            input_ids_.push_back(diagram_.AddItem());
+            input_ids_.push_back(port_id);
 
             std::cout << "- " << input_names[i] << std::endl;
         }
@@ -29,10 +30,11 @@ namespace ControlBlock
         // Create output ports
         for (size_t i = 0; i < output_names.size(); ++i)
         {
+            int port_id = diagram_.AddItem();
             std::shared_ptr<Port> p = std::make_shared<Port>(
-                output_names[i], PortType::OUTPUT_PORT, id_);
+                port_id, output_names[i], PortType::OUTPUT_PORT, id_);
             outputs_.push_back(p);
-            output_ids_.push_back(diagram_.AddItem());
+            output_ids_.push_back(port_id);
 
             std::cout << "- " << output_names[i] << std::endl;
         }
@@ -129,6 +131,33 @@ namespace ControlBlock
         /**
          * @brief Implement this in sub-blocks to provide a settings menu.
          */
+    }
+
+    toml::table Block::Serialize()
+    {
+        std::cout << "- Serializing Block: " << this->name_ << std::endl;
+
+        // Get the port serialization for each port
+        toml::array input_arr, output_arr;
+        for (int i = 0; i < inputs_.size(); ++i)
+        {
+            toml::table port_tbl = inputs_[i]->Serialize();
+            input_arr.push_back(port_tbl);
+        }
+
+        // Outputs
+        for (int i = 0; i < outputs_.size(); ++i)
+        {
+            toml::table port_tbl = outputs_[i]->Serialize();
+            output_arr.push_back(port_tbl);
+        }
+
+        toml::table tbl = toml::table{{"name", this->name_},
+                                      {"id", this->id_},
+                                      {"inputs", input_arr},
+                                      {"outputs", output_arr}};
+
+        return tbl;
     }
 
     bool Block::IsReady()

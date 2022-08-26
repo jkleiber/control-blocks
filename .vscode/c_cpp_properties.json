@@ -5,8 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/third_party/imnodes",
-                "${workspaceFolder}/third_party/bitsery",
-                "${workspaceFolder}/third_party/bitsery/include"
+                "${workspaceFolder}/third_party/tomlplusplus",
+                "${workspaceFolder}/third_party/tomlplusplus/include"
             ],
             "defines": [
                 "_DEBUG",

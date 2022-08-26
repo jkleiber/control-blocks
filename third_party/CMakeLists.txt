@@ -65,3 +65,6 @@ target_include_directories(IMNODES
 )
 
 target_link_libraries(IMNODES PUBLIC IMGUI)
+
+# ================= TOML++ ================
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tomlplusplus)

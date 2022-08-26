@@ -150,7 +150,8 @@ namespace ControlBlock
                             this->name_ + "_in" +
                             std::to_string(inputs_.size());
                         std::shared_ptr<Port> new_port = std::make_shared<Port>(
-                            new_port_name, PortType::INPUT_PORT, this->id_);
+                            new_id, new_port_name, PortType::INPUT_PORT,
+                            this->id_);
 
                         // Add port info to lists
                         inputs_.push_back(new_port);

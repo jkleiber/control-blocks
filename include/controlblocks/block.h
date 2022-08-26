@@ -7,15 +7,17 @@
 
 #include "imgui.h"
 #include "imnodes.h"
+#include "toml++/toml.h"
 #include <Eigen/Dense>
 
 #include "controlblocks/port.h"
+#include "controlblocks/serializable.h"
 
 class Diagram;
 
 namespace ControlBlock
 {
-    class Block
+    class Block : public Serializable
     {
 
     public:
@@ -30,6 +32,9 @@ namespace ControlBlock
         virtual void Compute();
         virtual void Render();
         virtual void Settings();
+
+        // Serialization
+        toml::table Serialize() override;
 
         // Computation
         bool IsReady();

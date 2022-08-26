@@ -139,16 +139,15 @@ void Gui::Menubar()
         {
             if (ImGui::MenuItem("New"))
             {
-                this->SaveDiagram();
-                diagram_.ClearDiagram();
+                // diagram_.SaveDiagram();
+                // diagram_.ClearDiagram();
             }
             else if (ImGui::MenuItem("Open"))
             {
-                this->LoadDiagram();
             }
             else if (ImGui::MenuItem("Save"))
             {
-                this->SaveDiagram();
+                diagram_.SaveDiagram("diagram.toml");
             }
 
             ImGui::EndMenu();
@@ -201,7 +200,3 @@ void Gui::Toolbar()
 
     ImGui::End();
 }
-
-void Gui::SaveDiagram() {}
-
-void Gui::LoadDiagram() {}

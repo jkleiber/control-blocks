@@ -26,7 +26,7 @@ else()
 endif(WIN32)
 
 # This depends on imgui
-target_link_libraries(controlblocks_lib PUBLIC Eigen3::Eigen IMGUI IMPLOT IMNODES)
+target_link_libraries(controlblocks_lib PUBLIC Eigen3::Eigen IMGUI IMPLOT IMNODES tomlplusplus_tomlplusplus)
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)
