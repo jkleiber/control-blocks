@@ -60,6 +60,8 @@ void Gui::Init()
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
+
+    // ImNodes style
     ImNodes::StyleColorsDark();
 
     // Setup Platform/Renderer backends
@@ -140,7 +142,7 @@ void Gui::Menubar()
             if (ImGui::MenuItem("New"))
             {
                 // diagram_.SaveDiagram();
-                // diagram_.ClearDiagram();
+                diagram_.ClearDiagram();
             }
             else if (ImGui::MenuItem("Open"))
             {

@@ -1,78 +1,91 @@
 [[diagram]]
 id = 0
-name = 'Gain'
-
-    [[diagram.inputs]]
-    conns = [ 4 ]
-    id = 1
-    name = 'Gain_input'
-    parent_id = 0
-    type = 0
-
-    [[diagram.outputs]]
-    conns = [ 7 ]
-    id = 2
-    name = 'Gain_output'
-    parent_id = 0
-    type = 1
-
-[[diagram]]
-id = 3
-inputs = []
-name = 'Constant'
-
-    [[diagram.outputs]]
-    conns = [ 1 ]
-    id = 4
-    name = 'Constant_output'
-    parent_id = 3
-    type = 1
-
-[[diagram]]
-id = 5
-name = 'Mux'
-
-    [[diagram.inputs]]
-    conns = [ 10 ]
-    id = 6
-    name = 'Mux_in1'
-    parent_id = 5
-    type = 0
-
-    [[diagram.inputs]]
-    conns = [ 2 ]
-    id = 7
-    name = 'Mux_in2'
-    parent_id = 5
-    type = 0
-
-    [[diagram.outputs]]
-    conns = [ 15 ]
-    id = 8
-    name = 'Mux_mux'
-    parent_id = 5
-    type = 1
-
-[[diagram]]
-id = 9
 inputs = []
 name = 'Constant'
 
     [[diagram.outputs]]
     conns = [ 6 ]
-    id = 10
+    id = 1
     name = 'Constant_output'
-    parent_id = 9
+    parent_id = 0
     type = 1
 
 [[diagram]]
-id = 14
+id = 2
+name = 'Gain'
+
+    [[diagram.inputs]]
+    conns = [ 8 ]
+    id = 3
+    name = 'Gain_input'
+    parent_id = 2
+    type = 0
+
+    [[diagram.outputs]]
+    conns = [ 7, 14 ]
+    id = 4
+    name = 'Gain_output'
+    parent_id = 2
+    type = 1
+
+[[diagram]]
+id = 5
+name = 'Sum'
+
+    [[diagram.inputs]]
+    conns = [ 1 ]
+    id = 6
+    name = 'Sum_in1'
+    parent_id = 5
+    type = 0
+
+    [[diagram.inputs]]
+    conns = [ 4 ]
+    id = 7
+    name = 'Sum_in2'
+    parent_id = 5
+    type = 0
+
+    [[diagram.outputs]]
+    conns = [ 3, 13 ]
+    id = 8
+    name = 'Sum_sum'
+    parent_id = 5
+    type = 1
+
+[[diagram]]
+id = 12
+name = 'Mux'
+
+    [[diagram.inputs]]
+    conns = [ 8 ]
+    id = 13
+    name = 'Mux_in1'
+    parent_id = 12
+    type = 0
+
+    [[diagram.inputs]]
+    conns = [ 4 ]
+    id = 14
+    name = 'Mux_in2'
+    parent_id = 12
+    type = 0
+
+    [[diagram.outputs]]
+    conns = [ 19 ]
+    id = 15
+    name = 'Mux_mux'
+    parent_id = 12
+    type = 1
+
+[[diagram]]
+id = 18
 name = 'Display'
 outputs = []
 
     [[diagram.inputs]]
-    conns = [ 8 ]
-    id = 15
+    conns = [ 15 ]
+    id = 19
     name = 'Display_input'
-    parent_id = 14
+    parent_id = 18
     type = 0

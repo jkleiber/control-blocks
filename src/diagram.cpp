@@ -199,10 +199,16 @@ void Diagram::SaveDiagram(std::string filename)
 
 void Diagram::ClearDiagram()
 {
+    // Clear everything
     this->blocks_.clear();
     this->wires_.clear();
     this->available_ids_.clear();
     this->num_items_ = 0;
+
+    // Reset ImNodes
+    ImNodes::DestroyContext();
+    ImNodes::CreateContext();
+    ImNodes::StyleColorsDark();
 }
 
 void Diagram::InitSim()
