@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <Eigen/Dense>
+#include <toml++/toml.h>
 
 #include "controlblocks/block.h"
 
@@ -21,6 +22,9 @@ namespace ControlBlock
         void Init(std::string block_name = "Display");
         void Compute() override;
         void Render() override;
+
+        // Serialization
+        toml::table Serialize() override;
 
     private:
         Eigen::VectorXd val_;

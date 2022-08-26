@@ -1,91 +1,50 @@
-[[diagram]]
+[[blocks]]
 id = 0
-inputs = []
 name = 'Constant'
+type = 'ConstantBlock'
+value = 0.0
+x_pos = 0.0
+y_pos = 0.0
 
-    [[diagram.outputs]]
-    conns = [ 6 ]
+    [[blocks.outputs]]
+    conns = []
     id = 1
     name = 'Constant_output'
     parent_id = 0
     type = 1
 
-[[diagram]]
+[[blocks]]
+gain = 0.0
 id = 2
 name = 'Gain'
+type = 'GainBlock'
+x_pos = 389.0
+y_pos = -13.0
 
-    [[diagram.inputs]]
-    conns = [ 8 ]
+    [[blocks.inputs]]
+    conns = []
     id = 3
     name = 'Gain_input'
     parent_id = 2
     type = 0
 
-    [[diagram.outputs]]
-    conns = [ 7, 14 ]
+    [[blocks.outputs]]
+    conns = []
     id = 4
     name = 'Gain_output'
     parent_id = 2
     type = 1
 
-[[diagram]]
-id = 5
-name = 'Sum'
-
-    [[diagram.inputs]]
-    conns = [ 1 ]
-    id = 6
-    name = 'Sum_in1'
-    parent_id = 5
-    type = 0
-
-    [[diagram.inputs]]
-    conns = [ 4 ]
-    id = 7
-    name = 'Sum_in2'
-    parent_id = 5
-    type = 0
-
-    [[diagram.outputs]]
-    conns = [ 3, 13 ]
-    id = 8
-    name = 'Sum_sum'
-    parent_id = 5
-    type = 1
-
-[[diagram]]
-id = 12
-name = 'Mux'
-
-    [[diagram.inputs]]
-    conns = [ 8 ]
-    id = 13
-    name = 'Mux_in1'
-    parent_id = 12
-    type = 0
-
-    [[diagram.inputs]]
-    conns = [ 4 ]
-    id = 14
-    name = 'Mux_in2'
-    parent_id = 12
-    type = 0
-
-    [[diagram.outputs]]
-    conns = [ 19 ]
-    id = 15
-    name = 'Mux_mux'
-    parent_id = 12
-    type = 1
-
-[[diagram]]
-id = 18
+[[blocks]]
+id = 1
 name = 'Display'
-outputs = []
+type = 'DisplayBlock'
+x_pos = 650.0
+y_pos = 0.0
 
-    [[diagram.inputs]]
-    conns = [ 15 ]
-    id = 19
+    [[blocks.inputs]]
+    conns = []
+    id = 2
     name = 'Display_input'
-    parent_id = 18
+    parent_id = 1
     type = 0

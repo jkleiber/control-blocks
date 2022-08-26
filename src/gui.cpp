@@ -139,6 +139,7 @@ void Gui::Menubar()
     {
         if (ImGui::BeginMenu("File"))
         {
+            // TODO: on New/Open, prompt user to save unsaved work
             if (ImGui::MenuItem("New"))
             {
                 // diagram_.SaveDiagram();
@@ -146,9 +147,13 @@ void Gui::Menubar()
             }
             else if (ImGui::MenuItem("Open"))
             {
+                // TODO: allow user to load specific file.
+                diagram_.ClearDiagram();
+                diagram_.LoadDiagram("diagram.toml");
             }
             else if (ImGui::MenuItem("Save"))
             {
+                // TODO: allow user to choose file location and name
                 diagram_.SaveDiagram("diagram.toml");
             }
 

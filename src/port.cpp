@@ -128,6 +128,11 @@ namespace ControlBlock
         return tbl;
     }
 
+    void Port::Deserialize(toml::table port_tbl)
+    {
+        // Make the connections
+    }
+
     void Port::operator=(Port &p)
     {
         this->id_ = p.id_;

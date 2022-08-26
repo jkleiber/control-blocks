@@ -40,6 +40,12 @@ namespace ControlBlock
         }
     }
 
+    void Block::Load(toml::table block_tbl)
+    {
+        // Go through each port and deserialize it to connect to all the other
+        // ports
+    }
+
     void Block::Broadcast()
     {
         // Broadcast to the output ports
@@ -80,50 +86,14 @@ namespace ControlBlock
          * @brief Implement Render() in each sub-block to get different behavior
          */
 
-        const float min_node_width = 100.f;
-        ImNodes::BeginNode(this->id_);
-
-        float node_width =
-            std::max(min_node_width, ImGui::CalcTextSize(name_.c_str()).x);
-        ImGui::PushItemWidth(node_width);
-
-        // Allow the block name to be changed
-        ImNodes::BeginNodeTitleBar();
-        char name_str[128];
-        strcpy(name_str, this->name_.c_str());
-        ImGui::InputText("", name_str, IM_ARRAYSIZE(name_str));
-        this->name_ = name_str;
-        ImNodes::EndNodeTitleBar();
-
-        // Input group
-        ImGui::BeginGroup();
-        for (size_t i = 0; i < inputs_.size(); ++i)
+        // If the position needs to be updated, do that here.
+        if (update_pos_)
         {
-            ImNodes::BeginInputAttribute(input_ids_[i]);
-            std::string in_name = "in" + std::to_string(i);
-            ImGui::TextUnformatted(in_name.c_str());
-            ImNodes::EndInputAttribute();
+            // Create an ImVec2 for positions
+            ImVec2 pos(x_pos_, y_pos_);
+            this->SetPosition(pos);
+            update_pos_ = false;
         }
-        ImGui::EndGroup();
-
-        ImGui::SameLine();
-
-        // Output group
-        ImGui::BeginGroup();
-        for (size_t i = 0; i < outputs_.size(); ++i)
-        {
-            int idx = static_cast<int>(i);
-
-            ImNodes::BeginOutputAttribute(output_ids_[i]);
-            std::string out_name = "out" + std::to_string(i);
-            const float label_width = ImGui::CalcTextSize(out_name.c_str()).x;
-            ImGui::Indent(node_width - label_width);
-            ImGui::TextUnformatted(out_name.c_str());
-            ImNodes::EndOutputAttribute();
-        }
-        ImGui::EndGroup();
-
-        ImNodes::EndNode();
     }
 
     void Block::Settings()
@@ -152,12 +122,61 @@ namespace ControlBlock
             output_arr.push_back(port_tbl);
         }
 
-        toml::table tbl = toml::table{{"name", this->name_},
-                                      {"id", this->id_},
-                                      {"inputs", input_arr},
-                                      {"outputs", output_arr}};
+        // Block position
+        ImVec2 pos = ImNodes::GetNodeGridSpacePos(this->id_);
+
+        toml::table tbl = toml::table{
+            {"type", "Block"},     {"name", this->name_},   {"id", this->id_},
+            {"inputs", input_arr}, {"outputs", output_arr}, {"x_pos", pos.x},
+            {"y_pos", pos.y}};
 
         return tbl;
+    }
+
+    void Block::Deserialize(toml::table data)
+    {
+        // Get the Block name
+        name_ = data["name"].value_or("Block");
+        id_ = data["id"].value_or(-1);
+        if (id_ < 0)
+        {
+            std::runtime_error("No saved ID available for loaded block");
+        }
+
+        std::cout << name_ << " loaded!\n";
+        std::cout << "INPUTS:\n";
+
+        // Load the ports
+        auto input_ports = data["inputs"].as_array();
+        auto output_ports = data["outputs"].as_array();
+
+        // If the input ports exist, go through them and create new ports
+        if (input_ports != nullptr)
+        {
+            for (int i = 0; i < input_ports->size(); ++i)
+            {
+                // Get the port's TOML table and load the port
+                toml::table port_tbl = *input_ports->at(i).as_table();
+                this->LoadPort(port_tbl);
+            }
+        }
+
+        std::cout << "OUTPUTS:\n";
+        // If the output ports exist, go through them and create new ports
+        if (output_ports != nullptr)
+        {
+            for (int i = 0; i < output_ports->size(); ++i)
+            {
+                // Get the port's TOML table and load the port
+                toml::table port_tbl = *output_ports->at(i).as_table();
+                this->LoadPort(port_tbl);
+            }
+        }
+
+        // Get the block's position for update
+        x_pos_ = data["x_pos"].value_or(0);
+        y_pos_ = data["y_pos"].value_or(0);
+        update_pos_ = true;
     }
 
     bool Block::IsReady()
@@ -319,6 +338,45 @@ namespace ControlBlock
                 break;
             }
         }
+    }
+
+    void Block::LoadPort(toml::table tbl)
+    {
+        // Port ID must exist
+        int port_id = tbl["id"].value_or(-1);
+        if (port_id < 0)
+        {
+            throw std::runtime_error("Invalid port ID on load.");
+        }
+
+        // PortType must also exist
+        int p_type = tbl["type"].value_or(-1);
+        if (p_type < 0)
+        {
+            throw std::runtime_error("Invalid port type on load.");
+        }
+        PortType port_type = static_cast<PortType>(p_type);
+
+        // Name is optional
+        std::string name = tbl["name"].value_or("port");
+
+        // Create the port
+        std::shared_ptr<Port> p =
+            std::make_shared<Port>(port_id, name, port_type, id_);
+
+        // Add the port to the list
+        if (port_type == PortType::INPUT_PORT)
+        {
+            inputs_.push_back(p);
+            input_ids_.push_back(port_id);
+        }
+        else
+        {
+            outputs_.push_back(p);
+            output_ids_.push_back(port_id);
+        }
+
+        std::cout << "- " << name << std::endl;
     }
 
 } // namespace ControlBlock

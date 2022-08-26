@@ -11,5 +11,6 @@ namespace ControlBlock
     {
     public:
         virtual toml::table Serialize() = 0;
+        virtual void Deserialize(toml::table data) = 0;
     };
 } // namespace ControlBlock

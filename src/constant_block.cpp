@@ -60,4 +60,32 @@ namespace ControlBlock
         ImNodes::EndNode();
     }
 
+    toml::table ConstantBlock::Serialize()
+    {
+        std::cout << "- Serializing ConstantBlock: " << this->name_
+                  << std::endl;
+
+        // Get the port serialization for each port
+        toml::array output_arr;
+
+        // Outputs
+        for (int i = 0; i < outputs_.size(); ++i)
+        {
+            toml::table port_tbl = outputs_[i]->Serialize();
+            output_arr.push_back(port_tbl);
+        }
+
+        // Block position
+        ImVec2 pos = ImNodes::GetNodeGridSpacePos(this->id_);
+
+        toml::table tbl = toml::table{{"type", "ConstantBlock"},
+                                      {"name", this->name_},
+                                      {"id", this->id_},
+                                      {"outputs", output_arr},
+                                      {"x_pos", pos.x},
+                                      {"y_pos", pos.y},
+                                      {"value", val_}};
+
+        return tbl;
+    }
 } // namespace ControlBlock

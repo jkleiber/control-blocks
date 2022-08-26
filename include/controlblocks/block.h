@@ -21,11 +21,12 @@ namespace ControlBlock
     {
 
     public:
-        Block(Diagram &diagram) : diagram_(diagram) {}
+        Block(Diagram &diagram) : diagram_(diagram), update_pos_(false) {}
         ~Block() {}
 
         void Init(std::string block_name, std::vector<std::string> input_names,
                   std::vector<std::string> output_names);
+        void Load(toml::table block_table);
         void Broadcast();
         virtual void ApplyInitial();
         virtual void SetInitial(Eigen::VectorXd x0);
@@ -35,6 +36,7 @@ namespace ControlBlock
 
         // Serialization
         toml::table Serialize() override;
+        void Deserialize(toml::table data) override;
 
         // Computation
         bool IsReady();
@@ -68,6 +70,11 @@ namespace ControlBlock
         int id_;
         std::string name_;
 
+        // Block position
+        int x_pos_;
+        int y_pos_;
+        bool update_pos_;
+
         // Diagram membership
         Diagram &diagram_;
 
@@ -76,5 +83,8 @@ namespace ControlBlock
         std::vector<std::shared_ptr<Port>> outputs_;
         std::vector<int> input_ids_;
         std::vector<int> output_ids_;
+
+        // Load ports from TOML
+        void LoadPort(toml::table data);
     };
 } // namespace ControlBlock

@@ -101,10 +101,23 @@ public:
         blocks_.push_back(T_block);
     }
 
+    template <typename T> void LoadBlock(toml::table block_tbl)
+    {
+        // Create block
+        std::shared_ptr<T> T_block = std::make_shared<T>(*this);
+
+        // Initialize block through de-serialization
+        T_block->Deserialize(block_tbl);
+
+        // Register block in diagram
+        blocks_.push_back(T_block);
+    }
+
     void AddWire(int from, int to);
 
     // Save / Load / New
     void SaveDiagram(std::string filename);
+    void LoadDiagram(std::string filename);
     void ClearDiagram();
 
 private:

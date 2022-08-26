@@ -67,6 +67,7 @@ namespace ControlBlock
 
         // Serialization
         toml::table Serialize() override;
+        void Deserialize(toml::table data) override;
 
     private:
         // Current ID

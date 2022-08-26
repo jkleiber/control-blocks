@@ -63,6 +63,30 @@ namespace ControlBlock
         ImGui::PopItemWidth();
 
         ImNodes::EndNode();
+
+        Block::Render();
+    }
+
+    toml::table DisplayBlock::Serialize()
+    {
+        std::cout << "- Serializing DisplayBlock: " << this->name_ << std::endl;
+
+        // Get the port serialization for each port
+        toml::array input_arr, output_arr;
+        for (int i = 0; i < inputs_.size(); ++i)
+        {
+            toml::table port_tbl = inputs_[i]->Serialize();
+            input_arr.push_back(port_tbl);
+        }
+
+        // Block position
+        ImVec2 pos = ImNodes::GetNodeGridSpacePos(this->id_);
+
+        toml::table tbl = toml::table{
+            {"type", "DisplayBlock"}, {"name", this->name_}, {"id", this->id_},
+            {"inputs", input_arr},    {"x_pos", pos.x},      {"y_pos", pos.y}};
+
+        return tbl;
     }
 
 } // namespace ControlBlock

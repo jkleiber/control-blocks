@@ -87,6 +87,38 @@ namespace ControlBlock
         ImGui::EndGroup();
 
         ImNodes::EndNode();
+
+        Block::Render();
+    }
+
+    toml::table SumBlock::Serialize()
+    {
+        std::cout << "- Serializing SumBlock: " << this->name_ << std::endl;
+
+        // Get the port serialization for each port
+        toml::array input_arr, output_arr;
+        for (int i = 0; i < inputs_.size(); ++i)
+        {
+            toml::table port_tbl = inputs_[i]->Serialize();
+            input_arr.push_back(port_tbl);
+        }
+
+        // Outputs
+        for (int i = 0; i < outputs_.size(); ++i)
+        {
+            toml::table port_tbl = outputs_[i]->Serialize();
+            output_arr.push_back(port_tbl);
+        }
+
+        // Block position
+        ImVec2 pos = ImNodes::GetNodeGridSpacePos(this->id_);
+
+        toml::table tbl = toml::table{
+            {"type", "SumBlock"},  {"name", this->name_},   {"id", this->id_},
+            {"inputs", input_arr}, {"outputs", output_arr}, {"x_pos", pos.x},
+            {"y_pos", pos.y}};
+
+        return tbl;
     }
 
 } // namespace ControlBlock

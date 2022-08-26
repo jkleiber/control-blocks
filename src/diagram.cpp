@@ -188,13 +188,72 @@ void Diagram::SaveDiagram(std::string filename)
 
     std::cout << "Diagram serialization done\n";
 
-    toml::table diagram_table = toml::table{{"diagram", blocks_array}};
+    toml::table diagram_table = toml::table{{"blocks", blocks_array}};
 
     // Output the table to the file.
     std::ofstream file;
     file.open(filename, std::ofstream::out | std::ofstream::trunc);
     file << diagram_table << std::flush;
     file.close();
+}
+
+void Diagram::LoadDiagram(std::string filename)
+{
+    // Read the file
+    std::ifstream in_file;
+    in_file.open(filename);
+    std::stringstream toml_ss;
+    toml_ss << in_file.rdbuf();
+    std::string toml_str = toml_ss.str();
+
+    // Parse the TOML
+    toml::table diagram_tbl = toml::parse(toml_str);
+
+    // Get the list of blocks
+    toml::array *blocks_array = diagram_tbl["blocks"].as_array();
+    if (blocks_array != nullptr)
+    {
+        // Go through and create blocks based on the TOML specs.
+        for (int i = 0; i < blocks_array->size(); ++i)
+        {
+            // Get the block description
+            toml::table *block_tbl = blocks_array->at(i).as_table();
+
+            // Only process valid blocks
+            if (block_tbl != nullptr)
+            {
+                // Load a new block based on the block table type
+                std::string block_type =
+                    block_tbl->get("type")->value_or("Block");
+
+                // There's probably a more efficient way to do this using a map
+                // of some sort
+                // TODO: be efficient
+                if (block_type == "ConstantBlock")
+                {
+                    this->LoadBlock<ControlBlock::ConstantBlock>(*block_tbl);
+                }
+                else if (block_type == "DisplayBlock")
+                {
+                    this->LoadBlock<ControlBlock::DisplayBlock>(*block_tbl);
+                }
+                else if (block_type == "GainBlock")
+                {
+                    this->LoadBlock<ControlBlock::GainBlock>(*block_tbl);
+                }
+                else if (block_type == "MuxBlock")
+                {
+                    this->LoadBlock<ControlBlock::MuxBlock>(*block_tbl);
+                }
+                else if (block_type == "SumBlock")
+                {
+                    this->LoadBlock<ControlBlock::SumBlock>(*block_tbl);
+                }
+            }
+        }
+
+        // TODO: Activate the ports
+    }
 }
 
 void Diagram::ClearDiagram()

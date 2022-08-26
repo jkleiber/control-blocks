@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <Eigen/Dense>
+#include <toml++/toml.h>
 
 #include "controlblocks/block.h"
 
@@ -23,6 +24,9 @@ namespace ControlBlock
         void Compute() override;
         void Render() override;
         void Settings() override;
+
+        // Serialization
+        toml::table Serialize() override;
 
     private:
         int num_mux_inputs;
