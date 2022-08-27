@@ -185,6 +185,37 @@ void Diagram::AddWire(int from, int to)
     }
 }
 
+void Diagram::RemoveWire(int id)
+{
+    // Find the wire to delete
+    for (int i = 0; i < wires_.size(); ++i)
+    {
+        if (wires_[i]->GetId() == id)
+        {
+            // Get the Port IDs
+            int from_id = wires_[i]->GetFromId();
+            int to_id = wires_[i]->GetToId();
+
+            // Remove the wire from the list
+            wires_.erase(wires_.begin() + i);
+
+            // Free the ID
+            this->RemoveItem(id);
+
+            // Remove the connection between the ports
+            std::shared_ptr<ControlBlock::Port> from_port =
+                GetPortByImNodesId(from_id);
+            std::shared_ptr<ControlBlock::Port> to_port =
+                GetPortByImNodesId(to_id);
+            from_port->RemoveConnection(to_port);
+            to_port->RemoveConnection(from_port);
+
+            // Done searching
+            break;
+        }
+    }
+}
+
 void Diagram::SaveDiagram(std::string filename)
 {
     // Go through each block and create a TOML array.
@@ -510,7 +541,27 @@ void Diagram::EditWires()
         this->AddWire(start_attr, end_attr);
     }
 
-    // TODO: detect wire deletion
+    // Detect wire deletion
+    int link_id;
+    if (ImNodes::IsLinkDestroyed(&link_id))
+    {
+        this->RemoveWire(link_id);
+    }
+
+    // Detect multiple wire deletion by user.
+    int num_wires_selected = ImNodes::NumSelectedLinks();
+    if (num_wires_selected > 0 && ImGui::IsKeyReleased(SDL_SCANCODE_DELETE))
+    {
+        // Get the selected wires
+        std::vector<int> selected_wires(num_wires_selected);
+        ImNodes::GetSelectedLinks(selected_wires.data());
+
+        // Remove each wire
+        for (const int wire_id : selected_wires)
+        {
+            this->RemoveWire(wire_id);
+        }
+    }
 }
 
 void Diagram::EditSettings()

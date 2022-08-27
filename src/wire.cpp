@@ -7,6 +7,8 @@ namespace ControlBlock
 
     void Wire::Render() { ImNodes::Link(id_, from_id_, to_id_); }
 
+    int Wire::GetId() { return this->id_; }
+
     int Wire::GetFromId() { return this->from_id_; }
 
     int Wire::GetToId() { return this->to_id_; }

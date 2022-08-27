@@ -23,6 +23,7 @@ namespace ControlBlock
         void Init();
         void Render();
 
+        int GetId();
         int GetFromId();
         int GetToId();
 

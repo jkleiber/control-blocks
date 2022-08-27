@@ -11,6 +11,13 @@
 #include "implot.h"
 #include "toml++/toml.h"
 
+#include <SDL.h>
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+#include <SDL_opengles2.h>
+#else
+#include <SDL_opengl.h>
+#endif
+
 #include "controlblocks/block.h"
 #include "controlblocks/gui_data.h"
 #include "controlblocks/port.h"
@@ -125,6 +132,7 @@ public:
     }
 
     void AddWire(int from, int to);
+    void RemoveWire(int id);
 
     // Save / Load / New
     void SaveDiagram(std::string filename);

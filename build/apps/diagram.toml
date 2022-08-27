@@ -18,8 +18,8 @@ gain = 8.0
 id = 2
 name = 'Gain'
 type = 'GainBlock'
-x_pos = 401.0
-y_pos = 239.0
+x_pos = 323.0
+y_pos = 297.0
 
     [[blocks.inputs]]
     conns = [ 1 ]
@@ -29,7 +29,7 @@ y_pos = 239.0
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 2, 8 ]
+    conns = [ 31, 23 ]
     id = 4
     name = 'Gain_output'
     parent_id = 2
@@ -43,7 +43,7 @@ x_pos = 717.0
 y_pos = 194.0
 
     [[blocks.inputs]]
-    conns = [ 4 ]
+    conns = [ 9 ]
     id = 2
     name = 'Display_input'
     parent_id = 1
@@ -68,8 +68,8 @@ y_pos = 54.0
 id = 6
 name = 'Mux'
 type = 'MuxBlock'
-x_pos = 421.0
-y_pos = 41.0
+x_pos = 582.0
+y_pos = 67.0
 
     [[blocks.inputs]]
     conns = [ 14 ]
@@ -79,14 +79,14 @@ y_pos = 41.0
     type = 0
 
     [[blocks.inputs]]
-    conns = [ 4 ]
+    conns = [ 33 ]
     id = 8
     name = 'Mux_in2'
     parent_id = 6
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 23 ]
+    conns = [ 2 ]
     id = 9
     name = 'Mux_mux'
     parent_id = 6
@@ -146,11 +146,11 @@ y_pos = 178.0
 id = 22
 name = 'Display'
 type = 'DisplayBlock'
-x_pos = 666.0
-y_pos = 105.0
+x_pos = 413.0
+y_pos = 414.0
 
     [[blocks.inputs]]
-    conns = [ 9 ]
+    conns = [ 4 ]
     id = 23
     name = 'Display_input'
     parent_id = 22
@@ -160,26 +160,48 @@ y_pos = 105.0
 id = 30
 name = 'Sum'
 type = 'SumBlock'
-x_pos = 669.0
-y_pos = 379.0
+x_pos = 464.0
+y_pos = 183.0
 
     [[blocks.inputs]]
-    conns = []
+    conns = [ 4 ]
     id = 31
     name = 'Sum_in1'
     parent_id = 30
     type = 0
 
     [[blocks.inputs]]
-    conns = []
+    conns = [ 41 ]
     id = 32
     name = 'Sum_in2'
     parent_id = 30
     type = 0
 
     [[blocks.outputs]]
-    conns = []
+    conns = [ 8, 40 ]
     id = 33
     name = 'Sum_sum'
     parent_id = 30
+    type = 1
+
+[[blocks]]
+gain = 1.01
+id = 39
+name = 'Gain'
+type = 'GainBlock'
+x_pos = 472.0
+y_pos = 302.0
+
+    [[blocks.inputs]]
+    conns = [ 33 ]
+    id = 40
+    name = 'Gain_input'
+    parent_id = 39
+    type = 0
+
+    [[blocks.outputs]]
+    conns = [ 32 ]
+    id = 41
+    name = 'Gain_output'
+    parent_id = 39
     type = 1
