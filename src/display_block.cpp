@@ -18,7 +18,7 @@ namespace ControlBlock
     void DisplayBlock::Compute()
     {
         // Get the input
-        val_ = Block::GetInput(input_port_name_);
+        val_ = Block::GetInput(input_ids_[0]);
     }
 
     void DisplayBlock::Render()
@@ -63,8 +63,6 @@ namespace ControlBlock
         ImGui::PopItemWidth();
 
         ImNodes::EndNode();
-
-        Block::Render();
     }
 
     toml::table DisplayBlock::Serialize()

@@ -21,7 +21,7 @@ namespace ControlBlock
 
     void GainBlock::ApplyInitial()
     {
-        Block::SetOutput(output_port_name_, x0_);
+        Block::SetOutput(output_ids_[0], x0_);
         Block::Broadcast();
     }
 
@@ -30,13 +30,13 @@ namespace ControlBlock
     void GainBlock::Compute()
     {
         // Get the input
-        Eigen::VectorXd input = Block::GetInput(input_port_name_);
+        Eigen::VectorXd input = Block::GetInput(input_ids_[0]);
 
         // Multiply
         Eigen::VectorXd output = val_ * input;
 
         // Send the output
-        Block::SetOutput(output_port_name_, output);
+        Block::SetOutput(output_ids_[0], output);
         Block::Broadcast();
     }
 
@@ -79,8 +79,6 @@ namespace ControlBlock
         ImGui::PopItemWidth();
 
         ImNodes::EndNode();
-
-        Block::Render();
     }
 
     toml::table GainBlock::Serialize()
@@ -111,5 +109,14 @@ namespace ControlBlock
             {"y_pos", pos.y},      {"gain", val_}};
 
         return tbl;
+    }
+
+    void GainBlock::Deserialize(toml::table tbl)
+    {
+        // Get the gain value
+        val_ = tbl["gain"].value_or(0.0);
+
+        // Deserialize the general components.
+        Block::Deserialize(tbl);
     }
 } // namespace ControlBlock

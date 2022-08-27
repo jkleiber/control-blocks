@@ -130,7 +130,7 @@ namespace ControlBlock
 
     void Port::Deserialize(toml::table port_tbl)
     {
-        // Make the connections
+        // Make the connections in Diagram::AddWire()
     }
 
     void Port::operator=(Port &p)

@@ -103,6 +103,15 @@ int Diagram::AddItem()
     return id;
 }
 
+void Diagram::AddLoadedItem(int id)
+{
+    // Only update the number of items if the ID is large enough.
+    if (id > num_items_)
+    {
+        num_items_ = id;
+    }
+}
+
 void Diagram::RemoveItem(int id)
 {
     // Add the ID to the list of available IDs for AddItem() to use
@@ -252,7 +261,129 @@ void Diagram::LoadDiagram(std::string filename)
             }
         }
 
-        // TODO: Activate the ports
+        // Activate the ports using AddWire()
+        for (int i = 0; i < blocks_array->size(); ++i)
+        {
+            // Get the block description
+            toml::table *block_tbl = blocks_array->at(i).as_table();
+
+            // Only process valid blocks
+            if (block_tbl != nullptr)
+            {
+                // Go through each input port
+                toml::node *input_node = block_tbl->get("inputs");
+                if (input_node != nullptr)
+                {
+                    toml::array *input_arr = input_node->as_array();
+                    if (input_arr != nullptr)
+                    {
+                        for (int j = 0; j < input_arr->size(); ++j)
+                        {
+                            // Find the input port ID and if it doesn't exist
+                            // for some reason, ignore it.
+                            toml::table *input_port =
+                                input_arr->at(j).as_table();
+                            if (input_port == nullptr)
+                            {
+                                continue;
+                            }
+
+                            // Try to get the ID, and if it doesn't exist, skip
+                            if (input_port->get("id") == nullptr)
+                            {
+                                continue;
+                            }
+                            int to_id = input_port->get("id")->value_or(-1);
+                            if (to_id < 0)
+                            {
+                                continue;
+                            }
+
+                            // Connect the input port to its connection
+                            if (input_port->get("conns") == nullptr)
+                            {
+                                continue;
+                            }
+                            int from_id =
+                                input_port->get("conns")->value_or(-1);
+                            if (from_id < 0)
+                            {
+                                continue;
+                            }
+
+                            // Add the connection
+                            this->AddWire(from_id, to_id);
+                            this->AddLoadedItem(from_id);
+                            this->AddLoadedItem(to_id);
+                        }
+                    }
+                }
+
+                // Go through each output port
+                toml::node *output_node = block_tbl->get("outputs");
+                if (output_node != nullptr)
+                {
+                    toml::array *output_arr = output_node->as_array();
+                    if (output_arr != nullptr)
+                    {
+                        for (int j = 0; j < output_arr->size(); ++j)
+                        {
+                            // Find the output port ID and if it doesn't exist
+                            // for some reason, ignore it.
+                            toml::table *output_port =
+                                output_arr->at(j).as_table();
+                            if (output_port == nullptr)
+                            {
+                                continue;
+                            }
+
+                            // Get the id if it is available.
+                            if (output_port->get("id") == nullptr)
+                            {
+                                continue;
+                            }
+                            int from_id = output_port->get("id")->value_or(-1);
+                            if (from_id < 0)
+                            {
+                                continue;
+                            }
+
+                            // Get all of the output connections
+                            if (output_port->get("conns") == nullptr)
+                            {
+                                continue;
+                            }
+                            toml::array *to_id_arr =
+                                output_port->get("conns")->as_array();
+                            if (to_id_arr == nullptr)
+                            {
+                                // If no connections exist, give up on this
+                                // port.
+                                continue;
+                            }
+
+                            // Go through all connections
+                            for (int k = 0; k < to_id_arr->size(); ++k)
+                            {
+                                int to_id = to_id_arr->at(k).value_or(-1);
+
+                                // If the port to connect doesn't exist, pass on
+                                // it
+                                if (to_id < 0)
+                                {
+                                    continue;
+                                }
+
+                                // Make the connection
+                                this->AddWire(from_id, to_id);
+                                this->AddLoadedItem(from_id);
+                                this->AddLoadedItem(to_id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

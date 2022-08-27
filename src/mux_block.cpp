@@ -12,10 +12,10 @@ namespace ControlBlock
         output_port_name_ = block_name + "_mux";
 
         // Initialize the block with a single output and no inputs
-        input_names_ = {input1_, input2_};
+        std::vector<std::string> input_names = {input1_, input2_};
         std::vector<std::string> output_name = {output_port_name_};
 
-        Block::Init(block_name, input_names_, output_name);
+        Block::Init(block_name, input_names, output_name);
     }
 
     void MuxBlock::Compute()
@@ -26,10 +26,10 @@ namespace ControlBlock
         // Track the size
         int total_size = 0;
 
-        for (size_t i = 0; i < input_names_.size(); ++i)
+        for (size_t i = 0; i < input_ids_.size(); ++i)
         {
             // Get the i-th input
-            Eigen::VectorXd val_i = Block::GetInput(input_names_[i]);
+            Eigen::VectorXd val_i = Block::GetInput(input_ids_[i]);
 
             // Sum up the sizes
             total_size += val_i.size();
@@ -48,7 +48,7 @@ namespace ControlBlock
         }
 
         // Send the output
-        Block::SetOutput(output_port_name_, output);
+        Block::SetOutput(output_ids_[0], output);
         Block::Broadcast();
     }
 
@@ -84,15 +84,13 @@ namespace ControlBlock
         // Output group
         ImGui::BeginGroup();
         ImNodes::BeginOutputAttribute(output_ids_[0]);
-        const float label_width = ImGui::CalcTextSize("Sum").x;
+        const float label_width = ImGui::CalcTextSize(">").x;
         ImGui::Indent(node_width - label_width);
         ImGui::TextUnformatted("Sum");
         ImNodes::EndOutputAttribute();
         ImGui::EndGroup();
 
         ImNodes::EndNode();
-
-        Block::Render();
     }
 
     void MuxBlock::Settings()
@@ -136,7 +134,6 @@ namespace ControlBlock
 
                         // Remove the port from this block's lists.
                         input_ids_.pop_back();
-                        input_names_.pop_back();
                         inputs_.pop_back();
                     }
                 }
@@ -158,7 +155,6 @@ namespace ControlBlock
                         // Add port info to lists
                         inputs_.push_back(new_port);
                         input_ids_.push_back(new_id);
-                        input_names_.push_back(new_port_name);
                     }
                 }
             }
@@ -196,6 +192,22 @@ namespace ControlBlock
             {"y_pos", pos.y}};
 
         return tbl;
+    }
+
+    void MuxBlock::Deserialize(toml::table data)
+    {
+        toml::array *in_arr = data["inputs"].as_array();
+        if (in_arr != nullptr)
+        {
+            num_mux_inputs = in_arr->size();
+        }
+        else
+        {
+            throw std::runtime_error("No inputs in a mux block on load");
+        }
+
+        // Deserialize the general characteristics
+        Block::Deserialize(data);
     }
 
 } // namespace ControlBlock

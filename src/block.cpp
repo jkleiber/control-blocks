@@ -40,12 +40,6 @@ namespace ControlBlock
         }
     }
 
-    void Block::Load(toml::table block_tbl)
-    {
-        // Go through each port and deserialize it to connect to all the other
-        // ports
-    }
-
     void Block::Broadcast()
     {
         // Broadcast to the output ports
@@ -85,15 +79,6 @@ namespace ControlBlock
         /**
          * @brief Implement Render() in each sub-block to get different behavior
          */
-
-        // If the position needs to be updated, do that here.
-        if (update_pos_)
-        {
-            // Create an ImVec2 for positions
-            ImVec2 pos(x_pos_, y_pos_);
-            this->SetPosition(pos);
-            update_pos_ = false;
-        }
     }
 
     void Block::Settings()
@@ -173,10 +158,11 @@ namespace ControlBlock
             }
         }
 
-        // Get the block's position for update
-        x_pos_ = data["x_pos"].value_or(0);
-        y_pos_ = data["y_pos"].value_or(0);
-        update_pos_ = true;
+        // Set the block's position
+        int x_pos = data["x_pos"].value_or(0);
+        int y_pos = data["y_pos"].value_or(0);
+        ImVec2 pos(x_pos, y_pos);
+        this->SetPosition(pos);
     }
 
     bool Block::IsReady()
@@ -285,6 +271,14 @@ namespace ControlBlock
 
     void Block::RemoveConnectedPort(std::shared_ptr<Port> port_to_remove)
     {
+        // If the port to remove is a nullptr, maybe this should be an error,
+        // but just show a debug message for now.
+        if (port_to_remove == nullptr)
+        {
+            std::cout << "Port to remove is not valid\n";
+            return;
+        }
+
         // Detect if this port is an input port so the port list can be
         // optimized (only need to explore ports of a different type).
         PortType remove_type = port_to_remove->GetType();
@@ -308,31 +302,32 @@ namespace ControlBlock
         }
     }
 
-    Eigen::VectorXd Block::GetInput(std::string port_name)
+    Eigen::VectorXd Block::GetInput(int port_id)
     {
         // Collect the input from the correct port.
         // Note: This does not check for duplicate port names. The first port
         // with that name will be chosen. Any duplicates will be ignored.
         for (size_t i = 0; i < inputs_.size(); ++i)
         {
-            if (inputs_[i]->GetName() == port_name)
+            if (inputs_[i]->GetId() == port_id)
             {
                 return inputs_[i]->GetValue();
             }
         }
 
-        throw std::runtime_error("No input port with name: " + port_name +
-                                 " for block: " + this->name_);
+        throw std::runtime_error(
+            "No input port with ID: " + std::to_string(port_id) +
+            " for block: " + this->name_);
     }
 
-    void Block::SetOutput(std::string port_name, Eigen::VectorXd val)
+    void Block::SetOutput(int port_id, Eigen::VectorXd val)
     {
         // Output the value to the correct port.
         // Note: This does not check for duplicate port names. The first port
         // with that name will be chosen. Any duplicates will be ignored.
         for (size_t i = 0; i < outputs_.size(); ++i)
         {
-            if (outputs_[i]->GetName() == port_name)
+            if (outputs_[i]->GetId() == port_id)
             {
                 outputs_[i]->SetValue(val);
                 break;

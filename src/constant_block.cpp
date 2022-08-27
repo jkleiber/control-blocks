@@ -19,7 +19,7 @@ namespace ControlBlock
     {
         Eigen::VectorXd output = Eigen::VectorXd::Zero(1);
         output(0) = val_;
-        Block::SetOutput(output_port_name_, output);
+        Block::SetOutput(output_ids_[0], output);
         Block::Broadcast();
     }
 
@@ -88,4 +88,14 @@ namespace ControlBlock
 
         return tbl;
     }
+
+    void ConstantBlock::Deserialize(toml::table tbl)
+    {
+        // Get the value
+        val_ = tbl["value"].value_or(0.0);
+
+        // Deserialize the general components.
+        Block::Deserialize(tbl);
+    }
+
 } // namespace ControlBlock

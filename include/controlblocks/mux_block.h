@@ -27,11 +27,11 @@ namespace ControlBlock
 
         // Serialization
         toml::table Serialize() override;
+        void Deserialize(toml::table data) override;
 
     private:
         int num_mux_inputs;
 
-        std::vector<std::string> input_names_;
         std::string output_port_name_;
 
         const float min_node_width_;

@@ -20,8 +20,8 @@ namespace ControlBlock
     void SumBlock::Compute()
     {
         // Get the input
-        Eigen::VectorXd val1 = Block::GetInput(input1_);
-        Eigen::VectorXd val2 = Block::GetInput(input2_);
+        Eigen::VectorXd val1 = Block::GetInput(input_ids_[0]);
+        Eigen::VectorXd val2 = Block::GetInput(input_ids_[1]);
 
         // Ensure the vectors are the same size.
         // If the vectors aren't the same size, fill the smaller one in with
@@ -45,7 +45,7 @@ namespace ControlBlock
         Eigen::VectorXd output = val1 + val2;
 
         // Send the output
-        Block::SetOutput(output_port_name_, output);
+        Block::SetOutput(output_ids_[0], output);
         Block::Broadcast();
     }
 
@@ -87,8 +87,6 @@ namespace ControlBlock
         ImGui::EndGroup();
 
         ImNodes::EndNode();
-
-        Block::Render();
     }
 
     toml::table SumBlock::Serialize()

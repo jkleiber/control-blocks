@@ -66,6 +66,14 @@ public:
     int AddItem();
 
     /**
+     * @brief Update the number of items to be at least as big as a given ID in
+     * order to avoid collisions when loading files.
+     *
+     * @param id ID to set at minimum
+     */
+    void AddLoadedItem(int id);
+
+    /**
      * @brief Remove an element from the canvas with a given ID. Save that ID
      * for future reassignment.
      * Note: The actual deletion of this element must be handled by the caller.
@@ -108,6 +116,9 @@ public:
 
         // Initialize block through de-serialization
         T_block->Deserialize(block_tbl);
+
+        // Ensure the block IDs are considered for future additions.
+        this->AddLoadedItem(T_block->GetId());
 
         // Register block in diagram
         blocks_.push_back(T_block);

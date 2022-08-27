@@ -20,12 +20,12 @@ namespace ControlBlock
         }
 
         void Init(std::string block_name = "Constant");
-        void Load(toml::table block_table);
         void Compute() override;
         void Render() override;
 
         // Serialization
         toml::table Serialize() override;
+        void Deserialize(toml::table data) override;
 
     private:
         double val_;
