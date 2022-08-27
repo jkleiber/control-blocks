@@ -6,7 +6,8 @@ namespace ControlBlock
 
     void Block::Init(std::string block_name,
                      std::vector<std::string> input_names,
-                     std::vector<std::string> output_names)
+                     std::vector<std::string> output_names,
+                     std::vector<bool> input_optionals)
     {
         id_ = diagram_.AddItem();
         name_ = block_name;
@@ -17,9 +18,15 @@ namespace ControlBlock
         // Create input ports
         for (size_t i = 0; i < input_names.size(); ++i)
         {
+            bool optional = false;
+            if (i < input_optionals.size())
+            {
+                optional = input_optionals[i];
+            }
+
             int port_id = diagram_.AddItem();
             std::shared_ptr<Port> p = std::make_shared<Port>(
-                port_id, input_names[i], PortType::INPUT_PORT, id_);
+                port_id, input_names[i], PortType::INPUT_PORT, id_, optional);
             inputs_.push_back(p);
             input_ids_.push_back(port_id);
 
@@ -355,9 +362,12 @@ namespace ControlBlock
         // Name is optional
         std::string name = tbl["name"].value_or("port");
 
+        // Optionality is optional
+        bool is_optional = tbl["is_optional"].value_or(false);
+
         // Create the port
         std::shared_ptr<Port> p =
-            std::make_shared<Port>(port_id, name, port_type, id_);
+            std::make_shared<Port>(port_id, name, port_type, id_, is_optional);
 
         // Add the port to the list
         if (port_type == PortType::INPUT_PORT)

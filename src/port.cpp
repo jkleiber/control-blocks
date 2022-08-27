@@ -23,6 +23,7 @@ namespace ControlBlock
         if (this->type_ == INPUT_PORT && p == in_conn_)
         {
             in_conn_ = nullptr;
+            this->ResetValue();
         }
         else if (this->type_ == OUTPUT_PORT)
         {
@@ -46,7 +47,7 @@ namespace ControlBlock
         return val_;
     }
 
-    bool Port::IsReady() { return ready_; }
+    bool Port::IsReady() { return (ready_ || is_optional_); }
 
     void Port::SetValue(Eigen::VectorXd val)
     {
@@ -87,10 +88,11 @@ namespace ControlBlock
         }
     }
 
+    int Port::GetId() { return this->id_; }
     std::string Port::GetName() { return this->name_; }
     PortType Port::GetType() { return this->type_; }
     int Port::GetParentId() { return this->parent_id_; }
-    int Port::GetId() { return this->id_; }
+    bool Port::IsOptional() { return this->is_optional_; }
 
     toml::table Port::Serialize()
     {
@@ -123,6 +125,7 @@ namespace ControlBlock
                                       {"name", this->name_},
                                       {"parent_id", this->parent_id_},
                                       {"type", port_type},
+                                      {"is_optional", is_optional_},
                                       {"conns", conns}};
 
         return tbl;
@@ -140,6 +143,7 @@ namespace ControlBlock
         this->type_ = p.type_;
         this->in_conn_ = p.in_conn_;
         this->out_conns_ = p.out_conns_;
+        this->is_optional_ = p.is_optional_;
     }
 
     bool Port::operator==(const Port &a) const
@@ -150,7 +154,11 @@ namespace ControlBlock
         is_equal &= this->type_ == a.type_;
         is_equal &= this->in_conn_ == a.in_conn_;
         is_equal &= this->out_conns_ == a.out_conns_;
+        is_equal &= this->is_optional_ == a.is_optional_;
 
         return is_equal;
     }
+
+    void Port::ResetValue() { val_ = Eigen::VectorXd::Zero(1); }
+
 } // namespace ControlBlock

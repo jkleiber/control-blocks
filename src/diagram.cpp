@@ -76,6 +76,9 @@ void Diagram::Update(GuiData &gui_data)
         // Add / Remove new wires to the diagram if the simulation is not active
         this->EditWires();
 
+        // Remove any blocks set for deletion
+        this->DetectBlockRemoval();
+
         // Allow blocks to have settings edited when the simulation isn't
         // running
         this->EditSettings();
@@ -89,14 +92,15 @@ int Diagram::AddItem()
     // Default behavior is to use the next available number, counting up from 0.
     int id = num_items_;
 
+    // TODO: This was causing problems with ImNodes drawing somehow?
     // If there are previously allocated IDs that are now available, use the
     // most recently freed ID off the stack.
-    if (available_ids_.size() > 0)
-    {
-        id = available_ids_[available_ids_.size() - 1];
-        available_ids_.pop_back();
-        return id;
-    }
+    // if (available_ids_.size() > 0)
+    // {
+    //     id = available_ids_[available_ids_.size() - 1];
+    //     available_ids_.pop_back();
+    //     return id;
+    // }
 
     // Otherwise just keep the default and increment to the next ID.
     num_items_ += 1;
@@ -211,6 +215,58 @@ void Diagram::RemoveWire(int id)
             to_port->RemoveConnection(from_port);
 
             // Done searching
+            break;
+        }
+    }
+}
+
+void Diagram::DetectBlockRemoval()
+{
+    // If any blocks are selected and the user wants to delete them, then delete
+    // all selected.
+    int num_blocks_selected = ImNodes::NumSelectedNodes();
+    if (num_blocks_selected > 0 && ImGui::IsKeyReleased(SDL_SCANCODE_DELETE))
+    {
+        std::vector<int> selected_block_ids(num_blocks_selected);
+        ImNodes::GetSelectedNodes(selected_block_ids.data());
+
+        // Go through each block to delete and delete it
+        for (int i = 0; i < num_blocks_selected; ++i)
+        {
+            this->RemoveBlock(selected_block_ids[i]);
+        }
+    }
+}
+
+void Diagram::RemoveBlock(int id)
+{
+    // Find the block to remove
+    for (size_t i = 0; i < blocks_.size(); ++i)
+    {
+        if (blocks_[i]->GetId() == id)
+        {
+            // Disconnect all the input ports
+            for (int j = 0; j < blocks_[i]->NumInputPorts(); ++j)
+            {
+                std::shared_ptr<ControlBlock::Port> port =
+                    blocks_[i]->GetInputPort(j);
+                this->RemovePort(port->GetId(), port);
+            }
+            // Disconnect all the output ports
+            for (int j = 0; j < blocks_[i]->NumOutputPorts(); ++j)
+            {
+                std::shared_ptr<ControlBlock::Port> port =
+                    blocks_[i]->GetOutputPort(j);
+                this->RemovePort(port->GetId(), port);
+            }
+
+            // Remove the block from the blocks list
+            blocks_.erase(blocks_.begin() + i);
+
+            // Free the ID
+            this->RemoveItem(id);
+
+            // Block successfully removed, no more searching required.
             break;
         }
     }

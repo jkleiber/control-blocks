@@ -25,10 +25,13 @@ namespace ControlBlock
     class Port : public Serializable
     {
     public:
-        Port(int id, std::string name, PortType type, int parent_id)
+        Port(int id, std::string name, PortType type, int parent_id,
+             bool is_optional = false)
             : id_(id), name_(name), type_(type), in_conn_(nullptr),
-              parent_id_(parent_id)
+              parent_id_(parent_id), is_optional_(is_optional)
         {
+            // Default to be scalar 0 in case the port is optional
+            val_ = Eigen::VectorXd::Zero(1);
         }
 
         Port(const Port &p)
@@ -38,6 +41,7 @@ namespace ControlBlock
             this->type_ = p.type_;
             this->in_conn_ = p.in_conn_;
             this->out_conns_ = p.out_conns_;
+            this->is_optional_ = p.is_optional_;
         }
 
         ~Port() {}
@@ -59,11 +63,12 @@ namespace ControlBlock
         void Receive(Eigen::VectorXd val, Port &caller);
 
         // Port characteristics
+        int GetId();
         std::string GetName();
         PortType GetType();
         void SetValue(Eigen::VectorXd val);
         int GetParentId();
-        int GetId();
+        bool IsOptional();
 
         // Serialization
         toml::table Serialize() override;
@@ -80,6 +85,7 @@ namespace ControlBlock
         std::string name_;
         uint16_t size_;
         PortType type_;
+        bool is_optional_;
 
         // Value
         Eigen::VectorXd val_;
@@ -89,5 +95,12 @@ namespace ControlBlock
 
         // Parent block
         int parent_id_;
+
+        /**
+         * @brief Reset the value of an input port if there is a removed
+         * connection.
+         *
+         */
+        void ResetValue();
     };
 } // namespace ControlBlock

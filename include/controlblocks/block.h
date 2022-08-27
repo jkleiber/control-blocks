@@ -25,7 +25,8 @@ namespace ControlBlock
         ~Block() {}
 
         void Init(std::string block_name, std::vector<std::string> input_names,
-                  std::vector<std::string> output_names);
+                  std::vector<std::string> output_names,
+                  std::vector<bool> input_optionals = std::vector<bool>());
         void Broadcast();
         virtual void ApplyInitial();
         virtual void SetInitial(Eigen::VectorXd x0);

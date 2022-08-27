@@ -11,11 +11,14 @@ namespace ControlBlock
         std::string input2_ = block_name + "_in2";
         output_port_name_ = block_name + "_mux";
 
+        // Input optionality
+        std::vector<bool> input_optionals = {true, true};
+
         // Initialize the block with a single output and no inputs
         std::vector<std::string> input_names = {input1_, input2_};
         std::vector<std::string> output_name = {output_port_name_};
 
-        Block::Init(block_name, input_names, output_name);
+        Block::Init(block_name, input_names, output_name, input_optionals);
     }
 
     void MuxBlock::Compute()
@@ -86,7 +89,7 @@ namespace ControlBlock
         ImNodes::BeginOutputAttribute(output_ids_[0]);
         const float label_width = ImGui::CalcTextSize(">").x;
         ImGui::Indent(node_width - label_width);
-        ImGui::TextUnformatted("Sum");
+        ImGui::TextUnformatted(">");
         ImNodes::EndOutputAttribute();
         ImGui::EndGroup();
 
@@ -150,7 +153,7 @@ namespace ControlBlock
                             std::to_string(inputs_.size());
                         std::shared_ptr<Port> new_port = std::make_shared<Port>(
                             new_id, new_port_name, PortType::INPUT_PORT,
-                            this->id_);
+                            this->id_, true);
 
                         // Add port info to lists
                         inputs_.push_back(new_port);

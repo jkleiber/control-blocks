@@ -131,8 +131,12 @@ public:
         blocks_.push_back(T_block);
     }
 
+    // Wire editing
     void AddWire(int from, int to);
     void RemoveWire(int id);
+
+    // Block removal
+    void DetectBlockRemoval();
 
     // Save / Load / New
     void SaveDiagram(std::string filename);
@@ -165,6 +169,9 @@ private:
     void AddBlockPopup();
     void EditWires();
     void EditSettings();
+
+    // Block removal
+    void RemoveBlock(int id);
 
     // Block searching
     std::shared_ptr<ControlBlock::Port> GetPortByImNodesId(int id);

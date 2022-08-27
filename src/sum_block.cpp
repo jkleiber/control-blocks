@@ -14,7 +14,9 @@ namespace ControlBlock
         std::vector<std::string> input_name = {input1_, input2_};
         std::vector<std::string> output_name = {output_port_name_};
 
-        Block::Init(block_name, input_name, output_name);
+        std::vector<bool> input_optionals = {true, true};
+
+        Block::Init(block_name, input_name, output_name, input_optionals);
     }
 
     void SumBlock::Compute()

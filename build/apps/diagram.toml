@@ -2,206 +2,84 @@
 id = 0
 name = 'Constant'
 type = 'ConstantBlock'
-value = 9.0
-x_pos = 72.0
-y_pos = 191.0
+value = 2.0
+x_pos = 240.0
+y_pos = 151.0
 
     [[blocks.outputs]]
-    conns = [ 3 ]
+    conns = [ 4 ]
     id = 1
+    is_optional = false
     name = 'Constant_output'
     parent_id = 0
     type = 1
 
 [[blocks]]
-gain = 8.0
 id = 2
-name = 'Gain'
-type = 'GainBlock'
-x_pos = 323.0
-y_pos = 297.0
+name = 'Sum'
+type = 'SumBlock'
+x_pos = 386.0
+y_pos = 164.0
+
+    [[blocks.inputs]]
+    conns = [ 12 ]
+    id = 3
+    is_optional = true
+    name = 'Sum_in1'
+    parent_id = 2
+    type = 0
 
     [[blocks.inputs]]
     conns = [ 1 ]
-    id = 3
-    name = 'Gain_input'
+    id = 4
+    is_optional = true
+    name = 'Sum_in2'
     parent_id = 2
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 31, 23 ]
-    id = 4
-    name = 'Gain_output'
+    conns = [ 8, 11 ]
+    id = 5
+    is_optional = false
+    name = 'Sum_sum'
     parent_id = 2
     type = 1
 
 [[blocks]]
-id = 1
+id = 7
 name = 'Display'
 type = 'DisplayBlock'
-x_pos = 717.0
-y_pos = 194.0
-
-    [[blocks.inputs]]
-    conns = [ 9 ]
-    id = 2
-    name = 'Display_input'
-    parent_id = 1
-    type = 0
-
-[[blocks]]
-id = 4
-name = 'Constant'
-type = 'ConstantBlock'
-value = 1.0
-x_pos = 176.0
-y_pos = 54.0
-
-    [[blocks.outputs]]
-    conns = [ 12 ]
-    id = 5
-    name = 'Constant_output'
-    parent_id = 4
-    type = 1
-
-[[blocks]]
-id = 6
-name = 'Mux'
-type = 'MuxBlock'
-x_pos = 582.0
-y_pos = 67.0
-
-    [[blocks.inputs]]
-    conns = [ 14 ]
-    id = 7
-    name = 'Mux_in1'
-    parent_id = 6
-    type = 0
-
-    [[blocks.inputs]]
-    conns = [ 33 ]
-    id = 8
-    name = 'Mux_in2'
-    parent_id = 6
-    type = 0
-
-    [[blocks.outputs]]
-    conns = [ 2 ]
-    id = 9
-    name = 'Mux_mux'
-    parent_id = 6
-    type = 1
-
-[[blocks]]
-id = 11
-name = 'Sum'
-type = 'SumBlock'
-x_pos = 298.0
-y_pos = 70.0
+x_pos = 613.0
+y_pos = 158.0
 
     [[blocks.inputs]]
     conns = [ 5 ]
-    id = 12
-    name = 'Sum_in1'
-    parent_id = 11
-    type = 0
-
-    [[blocks.inputs]]
-    conns = [ 19 ]
-    id = 13
-    name = 'Sum_in2'
-    parent_id = 11
-    type = 0
-
-    [[blocks.outputs]]
-    conns = [ 7, 18 ]
-    id = 14
-    name = 'Sum_sum'
-    parent_id = 11
-    type = 1
-
-[[blocks]]
-gain = 1.2
-id = 17
-name = 'Gain'
-type = 'GainBlock'
-x_pos = 325.0
-y_pos = 178.0
-
-    [[blocks.inputs]]
-    conns = [ 14 ]
-    id = 18
-    name = 'Gain_input'
-    parent_id = 17
-    type = 0
-
-    [[blocks.outputs]]
-    conns = [ 13 ]
-    id = 19
-    name = 'Gain_output'
-    parent_id = 17
-    type = 1
-
-[[blocks]]
-id = 22
-name = 'Display'
-type = 'DisplayBlock'
-x_pos = 413.0
-y_pos = 414.0
-
-    [[blocks.inputs]]
-    conns = [ 4 ]
-    id = 23
+    id = 8
+    is_optional = false
     name = 'Display_input'
-    parent_id = 22
+    parent_id = 7
     type = 0
-
-[[blocks]]
-id = 30
-name = 'Sum'
-type = 'SumBlock'
-x_pos = 464.0
-y_pos = 183.0
-
-    [[blocks.inputs]]
-    conns = [ 4 ]
-    id = 31
-    name = 'Sum_in1'
-    parent_id = 30
-    type = 0
-
-    [[blocks.inputs]]
-    conns = [ 41 ]
-    id = 32
-    name = 'Sum_in2'
-    parent_id = 30
-    type = 0
-
-    [[blocks.outputs]]
-    conns = [ 8, 40 ]
-    id = 33
-    name = 'Sum_sum'
-    parent_id = 30
-    type = 1
 
 [[blocks]]
 gain = 1.01
-id = 39
+id = 10
 name = 'Gain'
 type = 'GainBlock'
-x_pos = 472.0
-y_pos = 302.0
+x_pos = 503.0
+y_pos = 324.0
 
     [[blocks.inputs]]
-    conns = [ 33 ]
-    id = 40
+    conns = [ 5 ]
+    id = 11
+    is_optional = false
     name = 'Gain_input'
-    parent_id = 39
+    parent_id = 10
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 32 ]
-    id = 41
+    conns = [ 3 ]
+    id = 12
+    is_optional = false
     name = 'Gain_output'
-    parent_id = 39
+    parent_id = 10
     type = 1
