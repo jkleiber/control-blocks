@@ -129,7 +129,10 @@ namespace ControlBlock
     {
         // Get the Block name
         name_ = data["name"].value_or("Block");
-        id_ = data["id"].value_or(-1);
+
+        // Block ID manipulation
+        int min_id = data["min_id"].value_or(0);
+        id_ = data["id"].value_or(-1) - min_id;
         if (id_ < 0)
         {
             std::runtime_error("No saved ID available for loaded block");
@@ -149,6 +152,7 @@ namespace ControlBlock
             {
                 // Get the port's TOML table and load the port
                 toml::table port_tbl = *input_ports->at(i).as_table();
+                port_tbl.insert_or_assign("min_id", min_id);
                 this->LoadPort(port_tbl);
             }
         }
@@ -345,7 +349,8 @@ namespace ControlBlock
     void Block::LoadPort(toml::table tbl)
     {
         // Port ID must exist
-        int port_id = tbl["id"].value_or(-1);
+        int min_id = tbl["min_id"].value_or(0);
+        int port_id = tbl["id"].value_or(-1) - min_id;
         if (port_id < 0)
         {
             throw std::runtime_error("Invalid port ID on load.");

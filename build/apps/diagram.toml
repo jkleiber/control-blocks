@@ -1,13 +1,15 @@
+min_id = 0
+
 [[blocks]]
 id = 0
 name = 'Constant'
 type = 'ConstantBlock'
 value = 2.0
-x_pos = 240.0
-y_pos = 151.0
+x_pos = 145.0
+y_pos = 127.0
 
     [[blocks.outputs]]
-    conns = [ 4 ]
+    conns = [ 3, 14 ]
     id = 1
     is_optional = false
     name = 'Constant_output'
@@ -15,71 +17,141 @@ y_pos = 151.0
     type = 1
 
 [[blocks]]
+gain = 1.0
 id = 2
-name = 'Sum'
-type = 'SumBlock'
-x_pos = 386.0
-y_pos = 164.0
-
-    [[blocks.inputs]]
-    conns = [ 12 ]
-    id = 3
-    is_optional = true
-    name = 'Sum_in1'
-    parent_id = 2
-    type = 0
+name = 'Gain'
+type = 'GainBlock'
+x_pos = 317.0
+y_pos = 133.0
 
     [[blocks.inputs]]
     conns = [ 1 ]
-    id = 4
-    is_optional = true
-    name = 'Sum_in2'
+    id = 3
+    is_optional = false
+    name = 'Gain_input'
     parent_id = 2
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 8, 11 ]
-    id = 5
+    conns = [ 7, 9 ]
+    id = 4
     is_optional = false
-    name = 'Sum_sum'
+    name = 'Gain_output'
     parent_id = 2
     type = 1
 
 [[blocks]]
-id = 7
+id = 6
 name = 'Display'
 type = 'DisplayBlock'
-x_pos = 613.0
-y_pos = 158.0
+x_pos = 524.0
+y_pos = 155.0
 
     [[blocks.inputs]]
-    conns = [ 5 ]
-    id = 8
+    conns = [ 4 ]
+    id = 7
     is_optional = false
     name = 'Display_input'
-    parent_id = 7
+    parent_id = 6
+    type = 0
+
+[[blocks]]
+id = 8
+name = 'Mux'
+type = 'MuxBlock'
+x_pos = 480.0
+y_pos = 284.0
+
+    [[blocks.inputs]]
+    conns = [ 4 ]
+    id = 9
+    is_optional = true
+    name = 'Mux_in1'
+    parent_id = 8
+    type = 0
+
+    [[blocks.inputs]]
+    conns = [ 16 ]
+    id = 10
+    is_optional = true
+    name = 'Mux_in2'
+    parent_id = 8
+    type = 0
+
+    [[blocks.outputs]]
+    conns = [ 19 ]
+    id = 11
+    is_optional = false
+    name = 'Mux_mux'
+    parent_id = 8
+    type = 1
+
+[[blocks]]
+id = 13
+name = 'Sum'
+type = 'SumBlock'
+x_pos = 360.0
+y_pos = 332.0
+
+    [[blocks.inputs]]
+    conns = [ 1 ]
+    id = 14
+    is_optional = true
+    name = 'Sum_in1'
+    parent_id = 13
+    type = 0
+
+    [[blocks.inputs]]
+    conns = [ 24 ]
+    id = 15
+    is_optional = true
+    name = 'Sum_in2'
+    parent_id = 13
+    type = 0
+
+    [[blocks.outputs]]
+    conns = [ 10, 23 ]
+    id = 16
+    is_optional = false
+    name = 'Sum_sum'
+    parent_id = 13
+    type = 1
+
+[[blocks]]
+id = 18
+name = 'Display'
+type = 'DisplayBlock'
+x_pos = 654.0
+y_pos = 316.0
+
+    [[blocks.inputs]]
+    conns = [ 11 ]
+    id = 19
+    is_optional = false
+    name = 'Display_input'
+    parent_id = 18
     type = 0
 
 [[blocks]]
 gain = 1.01
-id = 10
+id = 22
 name = 'Gain'
 type = 'GainBlock'
-x_pos = 503.0
-y_pos = 324.0
+x_pos = 376.0
+y_pos = 430.0
 
     [[blocks.inputs]]
-    conns = [ 5 ]
-    id = 11
+    conns = [ 16 ]
+    id = 23
     is_optional = false
     name = 'Gain_input'
-    parent_id = 10
+    parent_id = 22
     type = 0
 
     [[blocks.outputs]]
-    conns = [ 3 ]
-    id = 12
+    conns = [ 15 ]
+    id = 24
     is_optional = false
     name = 'Gain_output'
-    parent_id = 10
+    parent_id = 22
     type = 1

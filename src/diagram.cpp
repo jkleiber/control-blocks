@@ -93,6 +93,12 @@ int Diagram::AddItem()
     int id = num_items_;
 
     // TODO: This was causing problems with ImNodes drawing somehow?
+    // If a diagram gets loaded and then a wire is deleted and you try to add a
+    // node, the program crashes due to Line 502 of imnodes.cpp having an assert
+    // related to the draw order
+    // IM_ASSERT(node_idx_depth_order.Size ==
+    // GImNodes->NodeIdxSubmissionOrder.Size);
+
     // If there are previously allocated IDs that are now available, use the
     // most recently freed ID off the stack.
     // if (available_ids_.size() > 0)
@@ -274,17 +280,27 @@ void Diagram::RemoveBlock(int id)
 
 void Diagram::SaveDiagram(std::string filename)
 {
+    // Track the minimum ID
+    int min_id = INT_MAX;
+
     // Go through each block and create a TOML array.
     toml::array blocks_array;
     for (int i = 0; i < blocks_.size(); ++i)
     {
+        // Save the ID if it is the minimum
+        if (min_id > blocks_[i]->GetId())
+        {
+            min_id = blocks_[i]->GetId();
+        }
+
         toml::table tbl_i = blocks_[i]->Serialize();
         blocks_array.push_back(tbl_i);
     }
 
     std::cout << "Diagram serialization done\n";
 
-    toml::table diagram_table = toml::table{{"blocks", blocks_array}};
+    toml::table diagram_table =
+        toml::table{{"blocks", blocks_array}, {"min_id", min_id}};
 
     // Output the table to the file.
     std::ofstream file;
@@ -305,6 +321,9 @@ void Diagram::LoadDiagram(std::string filename)
     // Parse the TOML
     toml::table diagram_tbl = toml::parse(toml_str);
 
+    // Get the minimum ID
+    int min_id = diagram_tbl["min_id"].value_or(0);
+
     // Get the list of blocks
     toml::array *blocks_array = diagram_tbl["blocks"].as_array();
     if (blocks_array != nullptr)
@@ -319,8 +338,16 @@ void Diagram::LoadDiagram(std::string filename)
             if (block_tbl != nullptr)
             {
                 // Load a new block based on the block table type
+                toml::node *type_node = block_tbl->get("type");
+                if (type_node == nullptr)
+                {
+                    continue;
+                }
                 std::string block_type =
                     block_tbl->get("type")->value_or("Block");
+
+                // Set the ID based on the minimum ID
+                block_tbl->insert_or_assign("min_id", min_id);
 
                 // There's probably a more efficient way to do this using a map
                 // of some sort
@@ -380,7 +407,8 @@ void Diagram::LoadDiagram(std::string filename)
                             {
                                 continue;
                             }
-                            int to_id = input_port->get("id")->value_or(-1);
+                            int to_id =
+                                input_port->get("id")->value_or(-1) - min_id;
                             if (to_id < 0)
                             {
                                 continue;
@@ -392,7 +420,7 @@ void Diagram::LoadDiagram(std::string filename)
                                 continue;
                             }
                             int from_id =
-                                input_port->get("conns")->value_or(-1);
+                                input_port->get("conns")->value_or(-1) - min_id;
                             if (from_id < 0)
                             {
                                 continue;
