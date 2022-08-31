@@ -39,7 +39,8 @@ void Diagram::Update(GuiData &gui_data)
     // Run the simulation if it is active
     if (sim_running_)
     {
-        this->Compute();
+        // TODO: run this in separate thread with integration of dynamics
+        this->Compute(gui_data);
     }
     else if (!sim_running_ && !sim_paused_)
     {
@@ -273,7 +274,39 @@ void Diagram::RemoveBlock(int id)
             this->RemoveItem(id);
 
             // Block successfully removed, no more searching required.
-            break;
+            return;
+        }
+    }
+
+    // The block might be a dynamical system
+    for (size_t i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        if (dyn_blocks_[i]->GetId() == id)
+        {
+            // Disconnect all the input ports
+            for (int j = 0; j < dyn_blocks_[i]->NumInputPorts(); ++j)
+            {
+                std::shared_ptr<ControlBlock::Port> port =
+                    dyn_blocks_[i]->GetInputPort(j);
+                this->RemovePort(port->GetId(), port);
+            }
+            // Disconnect all the output ports
+            for (int j = 0; j < blocks_[i]->NumOutputPorts(); ++j)
+            {
+                std::shared_ptr<ControlBlock::Port> port =
+                    dyn_blocks_[i]->GetOutputPort(j);
+                this->RemovePort(port->GetId(), port);
+            }
+
+            // Remove the block from the blocks list
+            dyn_blocks_.erase(blocks_.begin() + i);
+            dyn_block_states_.erase(dyn_block_states_.begin() + i);
+
+            // Free the ID
+            this->RemoveItem(id);
+
+            // Block successfully removed, no more searching required.
+            return;
         }
     }
 }
@@ -526,15 +559,81 @@ void Diagram::InitSim()
     {
         blk->ApplyInitial();
     }
+
+    // Initialize all dynamical systems
+    for (std::shared_ptr<ControlBlock::Block> dblk : dyn_blocks_)
+    {
+        dblk->ApplyInitial();
+    }
 }
 
-void Diagram::Compute()
+void Diagram::Compute(GuiData &gui_data)
+{
+    // Convert the block-by-block states into one big state for integration.
+    // This is where the integration is stored when the stepper is applied as
+    // well.
+    Eigen::VectorXd diagram_x =
+        ControlUtils::StackVectors(this->dyn_block_states_);
+
+    if (gui_data.solver == "Discrete")
+    {
+        this->rk4_stepper.do_step(
+            [this](state_type &x, state_type &dxdt, double t)
+            { return Dynamics(x, dxdt, t); },
+            diagram_x, clk_.GetTime(), dt_);
+
+        // Increment clock for this cycle
+        clk_.Increment();
+
+        // Stop the simulation if the time limit is exceeded.
+        if (clk_.GetTime() >= tf_)
+        {
+            sim_paused_ = false;
+            sim_running_ = false;
+        }
+    }
+    else
+    {
+        // If an unsupported solver is called, then do nothing.
+        sim_running_ = false;
+        sim_paused_ = false;
+        std::cout << "Solver not supported\n";
+    }
+
+    // Sort out the states
+    int idx = 0;
+    this->dyn_block_states_.clear();
+    for (int i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        // Get the number of states
+        int num_states_i = dyn_blocks_[i]->NumStates();
+
+        // Get the segment of interest from the full system state.
+        Eigen::VectorXd sub_state = diagram_x.segment(idx, num_states_i);
+
+        // Increment the tracking pointer for the full state to the next unused
+        // element.
+        idx += num_states_i;
+
+        // Save the block's state
+        this->dyn_block_states_.push_back(sub_state);
+    }
+}
+
+void Diagram::ComputeGraph()
 {
     // Track if no blocks are ready at all.
     bool no_blocks_ready = false;
 
     // Track blocks that need to be called
     std::vector<std::shared_ptr<ControlBlock::Block>> blocks_to_call = blocks_;
+
+    // Add dynamical system blocks if there are any.
+    if (dyn_blocks_.size() > 0)
+    {
+        blocks_to_call.insert(blocks_to_call.end(), dyn_blocks_.begin(),
+                              dyn_blocks_.end());
+    }
 
     // Empty list of blocks already called
     std::vector<std::shared_ptr<ControlBlock::Block>> called_blocks;
@@ -554,6 +653,19 @@ void Diagram::Compute()
             // Call Compute() if the block is ready.
             if (blk->IsReady())
             {
+                // If the block is a dynamical system, we need to set the state
+                // from the integration
+                if (blk->IsDynamicalSystem())
+                {
+                    // Get the index in the dynamic blocks list
+                    int idx = GetDynamicBlockIndex(blk);
+                    if (idx >= 0 && idx < dyn_block_states_.size())
+                    {
+                        // Set the state from the vector of Eigen::VectorXds
+                        blk->SetState(dyn_block_states_[idx]);
+                    }
+                }
+
                 // std::cout << "-> Running\n";
                 blk->Compute();
 
@@ -586,18 +698,26 @@ void Diagram::Compute()
             }
         }
     }
+}
 
-    // std::cout << "Time update\n";
+void Diagram::Dynamics(const state_type &x, state_type &dxdt, const double t)
+{
+    // Compute the graph
+    this->ComputeGraph();
 
-    // Increment clock for this cycle
-    clk_.Increment();
-
-    // Stop the simulation if the time limit is exceeded.
-    if (clk_.GetTime() >= tf_)
+    // Go through and get the update for each dynamical system block
+    std::vector<Eigen::VectorXd> dx_;
+    for (int i = 0; i < dyn_blocks_.size(); ++i)
     {
-        sim_paused_ = false;
-        sim_running_ = false;
+        Eigen::VectorXd blk_dx;
+        if (dyn_blocks_[i]->GetDx(&blk_dx))
+        {
+            dx_.push_back(blk_dx);
+        }
     }
+
+    // Stack up the dx/dt vectors
+    dxdt = ControlUtils::StackVectors(dx_);
 }
 
 void Diagram::Render()
@@ -729,4 +849,18 @@ std::shared_ptr<ControlBlock::Port> Diagram::GetPortByImNodesId(int id)
 
     // No port found.
     return nullptr;
+}
+
+int Diagram::GetDynamicBlockIndex(std::shared_ptr<ControlBlock::Block> blk)
+{
+    for (int i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        if (dyn_blocks_[i] == blk)
+        {
+            return i;
+        }
+    }
+
+    // Block not found
+    return -1;
 }

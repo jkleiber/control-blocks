@@ -1,6 +1,22 @@
 
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
+# ================= Boost ===============
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+# Boost is installed platform-specific
+if(WIN32)
+    set(BOOST_ROOT "/boost_1_80_0/boost")
+    set(Boost_INCLUDE_DIR "/boost_1_80_0/")
+    set(Boost_LIBRARY_DIR "/boost_1_80_0/lib")
+endif(WIN32)
+
+find_package(Boost 1.80 REQUIRED)
+
+# ============ Control Blocks ================
+
 # Note that headers are optional, and do not affect add_library, but they will
 # not show up in IDEs unless they are listed in add_library.
 file(GLOB HEADER_LIST
@@ -20,13 +36,13 @@ get_target_property(IMGUI_INCLUDES IMGUI INCLUDE_DIRECTORIES)
 
 if(WIN32)
     get_target_property(EIGEN_INCLUDES Eigen3::Eigen INCLUDE_DIRECTORIES)
-    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${EIGEN_INCLUDES})
+    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${EIGEN_INCLUDES} ${Boost_INCLUDE_DIRS})
 else()
-    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES})
+    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${Boost_INCLUDE_DIRS})
 endif(WIN32)
 
 # This depends on imgui
-target_link_libraries(controlblocks_lib PUBLIC Eigen3::Eigen IMGUI IMPLOT IMNODES tomlplusplus_tomlplusplus)
+target_link_libraries(controlblocks_lib PUBLIC Eigen3::Eigen IMGUI IMPLOT IMNODES tomlplusplus_tomlplusplus ${Boost_LIBRARIES})
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)

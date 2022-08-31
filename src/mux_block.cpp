@@ -42,13 +42,7 @@ namespace ControlBlock
         }
 
         // Stack the vectors
-        Eigen::VectorXd output = Eigen::VectorXd::Zero(total_size);
-        int idx = 0;
-        for (size_t i = 0; i < input_vals.size(); ++i)
-        {
-            output.segment(idx, input_vals[i].size()) = input_vals[i];
-            idx += input_vals[i].size();
-        }
+        Eigen::VectorXd output = ControlUtils::StackVectors(input_vals);
 
         // Send the output
         Block::SetOutput(output_ids_[0], output);

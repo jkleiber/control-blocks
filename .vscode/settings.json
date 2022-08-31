@@ -77,6 +77,8 @@
         "charconv": "cpp",
         "codecvt": "cpp",
         "forward_list": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "fft": "cpp",
+        "*.ipp": "cpp"
     }
 }

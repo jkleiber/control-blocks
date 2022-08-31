@@ -7,10 +7,12 @@ namespace ControlBlock
     void Block::Init(std::string block_name,
                      std::vector<std::string> input_names,
                      std::vector<std::string> output_names,
-                     std::vector<bool> input_optionals)
+                     std::vector<bool> input_optionals, bool dynamic_sys)
     {
+        // Block characteristics
         id_ = diagram_.AddItem();
         name_ = block_name;
+        dynamic_sys_ = dynamic_sys;
 
         std::cout << block_name << " created!\n";
         std::cout << "INPUTS:\n";
@@ -64,14 +66,7 @@ namespace ControlBlock
          */
     }
 
-    void Block::SetInitial(Eigen::VectorXd x0)
-    {
-        /**
-         * @brief Implement this in a sub-block to set internal block initial
-         * conditions.
-         */
-        // TODO: consider disconnected initial condition blocks to be ready?
-    }
+    void Block::SetInitial(Eigen::VectorXd x0) { x_ = x0; }
 
     void Block::Compute()
     {
@@ -95,6 +90,22 @@ namespace ControlBlock
          */
     }
 
+    bool Block::GetDx(Eigen::VectorXd *dx)
+    {
+        // Don't mess with nullptr, and don't set dx for non-dynamical systems
+        if (dx == nullptr || !dynamic_sys_)
+        {
+            return false;
+        }
+
+        // Otherwise, set the pointer to dx_ and return true
+        *dx = dx_;
+        return true;
+    }
+
+    void Block::SetState(Eigen::VectorXd x) { x_ = x; }
+    int Block::NumStates() { return x_.size(); }
+
     toml::table Block::Serialize()
     {
         std::cout << "- Serializing Block: " << this->name_ << std::endl;
@@ -117,10 +128,11 @@ namespace ControlBlock
         // Block position
         ImVec2 pos = ImNodes::GetNodeGridSpacePos(this->id_);
 
-        toml::table tbl = toml::table{
-            {"type", "Block"},     {"name", this->name_},   {"id", this->id_},
-            {"inputs", input_arr}, {"outputs", output_arr}, {"x_pos", pos.x},
-            {"y_pos", pos.y}};
+        toml::table tbl =
+            toml::table{{"type", "Block"},       {"name", this->name_},
+                        {"id", this->id_},       {"inputs", input_arr},
+                        {"outputs", output_arr}, {"x_pos", pos.x},
+                        {"y_pos", pos.y},        {"dynamic_sys", dynamic_sys_}};
 
         return tbl;
     }
@@ -129,6 +141,9 @@ namespace ControlBlock
     {
         // Get the Block name
         name_ = data["name"].value_or("Block");
+
+        // Determine if the block is a dynamical system, default to false
+        dynamic_sys_ = data["dynamic_sys"].value_or(false);
 
         // Block ID manipulation
         int min_id = data["min_id"].value_or(0);
@@ -192,6 +207,8 @@ namespace ControlBlock
     int Block::GetId() { return this->id_; }
 
     std::string Block::GetName() { return this->name_; }
+
+    bool Block::IsDynamicalSystem() { return this->dynamic_sys_; }
 
     void Block::SetPosition(ImVec2 pos)
     {

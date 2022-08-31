@@ -46,7 +46,7 @@ endif()
 # FetchContent_MakeAvailable was not added until CMake 3.14
 include(FetchContent)
 
-# Third party libraries are here
+# Third party libraries are here. This needs to be visited before src.
 add_subdirectory(third_party)
 
 # The compiled library code is here

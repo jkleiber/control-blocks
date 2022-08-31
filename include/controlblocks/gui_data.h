@@ -11,4 +11,7 @@ typedef struct gui_data_t
     bool start;
     bool pause;
     bool stop;
+
+    // ODE solver
+    std::string solver = "Discrete";
 } GuiData;

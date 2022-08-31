@@ -47,7 +47,18 @@ namespace ControlBlock
         return val_;
     }
 
-    bool Port::IsReady() { return (ready_ || is_optional_); }
+    bool Port::IsReady()
+    {
+        // An input port is ready if one of the following is met:
+        // - it is optional and unconnected
+        // - a value has been received more recently than the previous
+        // GetValue()
+        if (is_optional_ && in_conn_ == nullptr)
+        {
+            return true;
+        }
+        return ready_;
+    }
 
     void Port::SetValue(Eigen::VectorXd val)
     {

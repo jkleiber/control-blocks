@@ -7,37 +7,34 @@
 #include <toml++/toml.h>
 
 #include "controlblocks/block.h"
-#include "controlblocks/vector_utils.h"
+#include "controlblocks/state_space.h"
 
 namespace ControlBlock
 {
 
-    class MuxBlock : public Block
+    class StateSpaceBlock : public Block
     {
     public:
-        MuxBlock(Diagram &diagram)
-            : Block(diagram), num_mux_inputs(2), min_node_width_(50.0),
-              settings_open_(false)
+        StateSpaceBlock(Diagram &diagram)
+            : Block(diagram), min_node_width_(50.0)
         {
         }
 
-        void Init(std::string block_name = "Mux");
+        void Init(std::string block_name = "State Space");
+
+        // Overriden Block functions
+        void ApplyInitial() override;
         void Compute() override;
         void Render() override;
-        void Settings() override;
 
         // Serialization
         toml::table Serialize() override;
         void Deserialize(toml::table data) override;
 
     private:
-        int num_mux_inputs;
-
-        std::string output_port_name_;
+        ControlUtils::StateSpace ss;
 
         const float min_node_width_;
-
-        bool settings_open_;
     };
 
 } // namespace ControlBlock

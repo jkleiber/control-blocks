@@ -13,15 +13,19 @@ This will enable open source development and simulation of control systems.
     - Gain (only faciliator of feedback at the moment)
     - Mux (can add ports but not remove)
     - Display
-- Can add wires and blocks, but cannot remove
+- Can add/remove blocks and wires
+- Saving and loading the diagram (only one filename supported right now)
+
+## Dependencies
+See `third_party` for a list of dependencies and how to install them.
 
 
 ## Active Work
-- Diagram save / load
-- Enable the removal of blocks and wires
-    - Enable removal of mux ports
-- Improve feedback
-    - Need to rely less on the gain block, it should be automatic. This will require improving the simulation engine.
+- ODE solver
+    - Using Boost for this.
+- Improve feedback systems
+    - This should be ready theoretically if each Dynamic system block actually implements `ApplyInitial()`
+    - Unclear if basic blocks like sum and mux should have this feature, but it is likely they should
 - Variables in a workspace
 
 ## Roadmap

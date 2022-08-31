@@ -201,6 +201,32 @@ void Gui::Toolbar()
     ImGui::InputScalar("dt", ImGuiDataType_Double, &gui_data_.dt, NULL);
     ImGui::EndGroup();
 
+    // ODE Solver
+    ImGui::SameLine();
+    const char *ode_solvers[] = {"Discrete", "Cash-Karp 54", "dopri5"};
+    if (ImGui::BeginCombo("ODE Solver", gui_data_.solver.data()))
+    {
+        for (int i = 0; i < IM_ARRAYSIZE(ode_solvers); i++)
+        {
+            bool is_selected =
+                (gui_data_.solver.c_str() ==
+                 ode_solvers[i]); // You can store your selection however you
+                                  // want, outside or inside your objects
+            if (ImGui::Selectable(ode_solvers[i], is_selected))
+            {
+                gui_data_.solver = ode_solvers[i];
+            }
+            if (is_selected)
+            {
+                ImGui::SetItemDefaultFocus(); // You may set the initial focus
+                                              // when opening the combo
+                                              // (scrolling + for keyboard
+                                              // navigation support)
+            }
+        }
+        ImGui::EndCombo();
+    }
+
     // Show simulation time
     ImGui::SameLine();
     ImGui::Text("%s: %f", "Simulation Time", diagram_.GetTime());

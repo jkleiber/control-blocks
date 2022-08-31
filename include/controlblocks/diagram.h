@@ -11,6 +11,12 @@
 #include "implot.h"
 #include "toml++/toml.h"
 
+// Boost
+#include <boost/numeric/odeint.hpp>
+#include <boost/numeric/odeint/external/eigen/eigen.hpp>
+using namespace boost::numeric::odeint;
+
+// SDL
 #include <SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -35,6 +41,9 @@ typedef struct block_types_t
 {
     std::string ui_name;
 } BlockType;
+
+// Make Eigen::VectorXd work with Boost integrator
+typedef Eigen::VectorXd state_type;
 
 /**
  * @brief This class manages all the blocks that are in a control diagram
@@ -113,7 +122,15 @@ public:
         T_block->SetPosition(pos);
 
         // Register block in diagram
-        blocks_.push_back(T_block);
+        if (!T_block->IsDynamicalSystem())
+        {
+            blocks_.push_back(T_block);
+        }
+        else
+        {
+            // If it is a dynamical block, then insert in that list instead
+            dyn_blocks_.push_back(T_block);
+        }
     }
 
     template <typename T> void LoadBlock(toml::table block_tbl)
@@ -128,7 +145,15 @@ public:
         this->AddLoadedItem(T_block->GetId());
 
         // Register block in diagram
-        blocks_.push_back(T_block);
+        if (!T_block->IsDynamicalSystem())
+        {
+            blocks_.push_back(T_block);
+        }
+        else
+        {
+            // If it is a dynamical block, then insert in that list instead
+            dyn_blocks_.push_back(T_block);
+        }
     }
 
     // Wire editing
@@ -147,6 +172,10 @@ private:
     std::vector<std::shared_ptr<ControlBlock::Block>> blocks_;
     std::vector<std::shared_ptr<ControlBlock::Wire>> wires_;
 
+    // Dynamical systems
+    std::vector<std::shared_ptr<ControlBlock::Block>> dyn_blocks_;
+    std::vector<Eigen::VectorXd> dyn_block_states_;
+
     // ID tracking
     int num_items_;
     std::vector<int> available_ids_;
@@ -160,9 +189,16 @@ private:
     double tf_;
     SimClock clk_;
 
+    // ODE solvers
+    runge_kutta4<state_type> rk4_stepper;
+
     // Diagram simulation
     void InitSim();
-    void Compute();
+    void Compute(GuiData &gui_data);
+    void ComputeGraph();
+
+    // ODE Solving
+    void Dynamics(const state_type &x, state_type &dxdt, const double t);
 
     // Diagram rendering
     void Render();
@@ -175,4 +211,5 @@ private:
 
     // Block searching
     std::shared_ptr<ControlBlock::Port> GetPortByImNodesId(int id);
+    int GetDynamicBlockIndex(std::shared_ptr<ControlBlock::Block> blk);
 };
