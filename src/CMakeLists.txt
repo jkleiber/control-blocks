@@ -1,6 +1,9 @@
 
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
+# ================= Zep ===============
+set(ZEP_INCLUDE_DIR "${ControlBlocks_SOURCE_DIR}/third_party/zep/include")
+
 # ================= Boost ===============
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -40,9 +43,9 @@ get_target_property(IMGUI_INCLUDES IMGUI INCLUDE_DIRECTORIES)
 
 if(WIN32)
     get_target_property(EIGEN_INCLUDES Eigen3::Eigen INCLUDE_DIRECTORIES)
-    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${EIGEN_INCLUDES} ${Boost_INCLUDE_DIRS})
+    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${EIGEN_INCLUDES} ${Boost_INCLUDE_DIRS} ${ZEP_INCLUDE_DIR})
 else()
-    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${Boost_INCLUDE_DIRS})
+    target_include_directories(controlblocks_lib PUBLIC ../include ${IMGUI_INCLUDES} ${Boost_INCLUDE_DIRS} ${ZEP_INCLUDE_DIR})
 endif(WIN32)
 
 # This depends on imgui

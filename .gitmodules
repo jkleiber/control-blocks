@@ -1,3 +1,15 @@
 [submodule "third_party/zep"]
 	path = third_party/zep
 	url = git@github.com:Rezonality/zep.git
+[submodule "third_party/implot"]
+	path = third_party/implot
+	url = git@github.com:epezent/implot.git
+[submodule "third_party/tomlplusplus"]
+	path = third_party/tomlplusplus
+	url = git@github.com:marzer/tomlplusplus.git
+[submodule "third_party/imgui"]
+	path = third_party/imgui
+	url = git@github.com:ocornut/imgui.git
+[submodule "third_party/imnodes"]
+	path = third_party/imnodes
+	url = git@github.com:jkleiber/imnodes.git
