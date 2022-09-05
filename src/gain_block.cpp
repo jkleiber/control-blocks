@@ -27,7 +27,7 @@ namespace ControlBlock
 
     void GainBlock::SetInitial(Eigen::VectorXd x0) { x0_ = x0; }
 
-    void GainBlock::Compute()
+    void GainBlock::Compute(double t)
     {
         // Get the input
         Eigen::VectorXd input = Block::GetInput(input_ids_[0]);

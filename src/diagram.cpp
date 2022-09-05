@@ -88,6 +88,8 @@ void Diagram::Update(GuiData &gui_data)
 
 double Diagram::GetTime() { return clk_.GetTime(); }
 
+double Diagram::GetDt() { return clk_.GetDt(); }
+
 int Diagram::AddItem()
 {
     // Default behavior is to use the next available number, counting up from 0.
@@ -575,13 +577,38 @@ void Diagram::Compute(GuiData &gui_data)
     Eigen::VectorXd diagram_x =
         ControlUtils::StackVectors(this->dyn_block_states_);
 
-    if (gui_data.solver == "Discrete")
+    // TODO: there's probably a nice way to do this with a map<String, odeint
+    // stepper>
+    if (gui_data.solver == "RK4")
     {
         this->rk4_stepper.do_step(
             [this](state_type &x, state_type &dxdt, double t)
             { return Dynamics(x, dxdt, t); },
             diagram_x, clk_.GetTime(), dt_);
+    }
+    else if (gui_data.solver == "Cash-Karp54")
+    {
+        this->rkck54_stepper.do_step(
+            std::bind(&Diagram::Dynamics, this, _1, _2, _3), diagram_x,
+            clk_.GetTime(), dt_);
+    }
+    else if (gui_data.solver == "dopri5")
+    {
+        this->rkd5_stepper.do_step(
+            std::bind(&Diagram::Dynamics, this, _1, _2, _3), diagram_x,
+            clk_.GetTime(), dt_);
+    }
+    else
+    {
+        // If an unsupported solver is called, then do nothing.
+        sim_running_ = false;
+        sim_paused_ = false;
+        std::cout << "Solver not supported\n";
+    }
 
+    // Time management
+    if (sim_running_ && !sim_paused_)
+    {
         // Increment clock for this cycle
         clk_.Increment();
 
@@ -591,13 +618,6 @@ void Diagram::Compute(GuiData &gui_data)
             sim_paused_ = false;
             sim_running_ = false;
         }
-    }
-    else
-    {
-        // If an unsupported solver is called, then do nothing.
-        sim_running_ = false;
-        sim_paused_ = false;
-        std::cout << "Solver not supported\n";
     }
 
     // Sort out the states
@@ -620,7 +640,7 @@ void Diagram::Compute(GuiData &gui_data)
     }
 }
 
-void Diagram::ComputeGraph()
+void Diagram::ComputeGraph(double t)
 {
     // Track if no blocks are ready at all.
     bool no_blocks_ready = false;
@@ -667,7 +687,7 @@ void Diagram::ComputeGraph()
                 }
 
                 // std::cout << "-> Running\n";
-                blk->Compute();
+                blk->Compute(t);
 
                 // Move the block to the called list
                 called_blocks.push_back(blk);
@@ -703,7 +723,7 @@ void Diagram::ComputeGraph()
 void Diagram::Dynamics(const state_type &x, state_type &dxdt, const double t)
 {
     // Compute the graph
-    this->ComputeGraph();
+    this->ComputeGraph(t);
 
     // Go through and get the update for each dynamical system block
     std::vector<Eigen::VectorXd> dx_;

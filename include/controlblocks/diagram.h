@@ -2,6 +2,7 @@
 #pragma once
 
 #include <fstream>
+#include <functional>
 #include <memory>
 
 #include "imgui.h"
@@ -12,6 +13,8 @@
 #include "toml++/toml.h"
 
 // Boost
+#define BOOST_ALLOW_DEPRECATED_HEADERS
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/numeric/odeint.hpp>
 #include <boost/numeric/odeint/external/eigen/eigen.hpp>
 using namespace boost::numeric::odeint;
@@ -36,6 +39,8 @@ using namespace boost::numeric::odeint;
 #include "controlblocks/gain_block.h"
 #include "controlblocks/mux_block.h"
 #include "controlblocks/sum_block.h"
+
+using namespace std::placeholders;
 
 typedef struct block_types_t
 {
@@ -73,6 +78,13 @@ public:
      * @return double Simulation time
      */
     double GetTime();
+
+    /**
+     * @brief Get the timestep
+     *
+     * @return double Timestep
+     */
+    double GetDt();
 
     /**
      * @brief Add an element to the ImGui canvas with a unique ID
@@ -191,11 +203,13 @@ private:
 
     // ODE solvers
     runge_kutta4<state_type> rk4_stepper;
+    runge_kutta_dopri5<state_type> rkd5_stepper;
+    runge_kutta_cash_karp54<state_type> rkck54_stepper;
 
     // Diagram simulation
     void InitSim();
     void Compute(GuiData &gui_data);
-    void ComputeGraph();
+    void ComputeGraph(double t);
 
     // ODE Solving
     void Dynamics(const state_type &x, state_type &dxdt, const double t);

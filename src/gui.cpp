@@ -203,16 +203,16 @@ void Gui::Toolbar()
 
     // ODE Solver
     ImGui::SameLine();
-    const char *ode_solvers[] = {"Discrete", "Cash-Karp 54", "dopri5"};
     if (ImGui::BeginCombo("ODE Solver", gui_data_.solver.data()))
     {
-        for (int i = 0; i < IM_ARRAYSIZE(ode_solvers); i++)
+        for (int i = 0; i < ode_solvers.size(); i++)
         {
             bool is_selected =
                 (gui_data_.solver.c_str() ==
-                 ode_solvers[i]); // You can store your selection however you
-                                  // want, outside or inside your objects
-            if (ImGui::Selectable(ode_solvers[i], is_selected))
+                 ode_solvers[i]
+                     .c_str()); // You can store your selection however you
+                                // want, outside or inside your objects
+            if (ImGui::Selectable(ode_solvers[i].c_str(), is_selected))
             {
                 gui_data_.solver = ode_solvers[i];
             }

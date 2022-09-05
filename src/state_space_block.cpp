@@ -23,7 +23,7 @@ namespace ControlBlock
         this->SetOutput(output_ids_[0], x_);
     }
 
-    void StateSpaceBlock::Compute()
+    void StateSpaceBlock::Compute(double t)
     {
         // Get the input, u
         Eigen::VectorXd u = Block::GetInput(input_ids_[0]);

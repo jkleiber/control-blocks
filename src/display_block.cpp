@@ -15,7 +15,7 @@ namespace ControlBlock
         Block::Init(block_name, input_name, output_name);
     }
 
-    void DisplayBlock::Compute()
+    void DisplayBlock::Compute(double t)
     {
         // Get the input
         val_ = Block::GetInput(input_ids_[0]);

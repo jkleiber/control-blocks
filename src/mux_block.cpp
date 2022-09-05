@@ -21,7 +21,7 @@ namespace ControlBlock
         Block::Init(block_name, input_names, output_name, input_optionals);
     }
 
-    void MuxBlock::Compute()
+    void MuxBlock::Compute(double t)
     {
         // Maintain a vector of Eigen::VectorXds
         std::vector<Eigen::VectorXd> input_vals;

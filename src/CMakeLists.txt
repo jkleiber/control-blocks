@@ -30,6 +30,10 @@ file(GLOB SOURCE_LIST
 # Make an automatic library - will be static or dynamic based on user setting
 add_library(controlblocks_lib STATIC ${SOURCE_LIST} ${HEADER_LIST})
 set_target_properties(controlblocks_lib PROPERTIES LINKER_LANGUAGE CXX)
+target_compile_features(controlblocks_lib PRIVATE cxx_std_17)
+
+# HACK: Remove when Boost fixes odeint deprecation warnings
+target_compile_options(controlblocks_lib PRIVATE -Wno-deprecated)
 
 # We need the top level include directory as well as the imgui ones.
 get_target_property(IMGUI_INCLUDES IMGUI INCLUDE_DIRECTORIES)

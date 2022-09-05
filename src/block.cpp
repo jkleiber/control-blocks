@@ -68,7 +68,7 @@ namespace ControlBlock
 
     void Block::SetInitial(Eigen::VectorXd x0) { x_ = x0; }
 
-    void Block::Compute()
+    void Block::Compute(double t)
     {
         /**
          * @brief Implement Compute() in each sub-block to get different I/O

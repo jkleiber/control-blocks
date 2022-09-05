@@ -24,7 +24,7 @@ namespace ControlBlock
 
         // Overriden Block functions
         void ApplyInitial() override;
-        void Compute() override;
+        void Compute(double t) override;
         void Render() override;
 
         // Serialization

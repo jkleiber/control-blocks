@@ -15,7 +15,7 @@ namespace ControlBlock
         Block::Init(block_name, no_input_names, output_name);
     }
 
-    void ConstantBlock::Compute()
+    void ConstantBlock::Compute(double t)
     {
         Eigen::VectorXd output = Eigen::VectorXd::Zero(1);
         output(0) = val_;

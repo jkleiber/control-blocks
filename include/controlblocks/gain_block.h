@@ -22,7 +22,7 @@ namespace ControlBlock
         void Init(std::string block_name = "Gain");
         void ApplyInitial() override;
         void SetInitial(Eigen::VectorXd x0) override;
-        void Compute() override;
+        void Compute(double t) override;
         void Render() override;
 
         // Serialization

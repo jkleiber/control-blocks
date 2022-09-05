@@ -30,7 +30,7 @@ namespace ControlBlock
                   bool dynamic_sys = false);
         void Broadcast();
         virtual void ApplyInitial();
-        virtual void Compute();
+        virtual void Compute(double t);
         virtual void Render();
         virtual void Settings();
 
@@ -80,6 +80,9 @@ namespace ControlBlock
 
         // Diagram membership
         Diagram &diagram_;
+
+        // Timing
+        double prev_compute_t_;
 
         // Internal state
         Eigen::VectorXd x_;

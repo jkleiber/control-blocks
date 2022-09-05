@@ -19,7 +19,7 @@ namespace ControlBlock
         Block::Init(block_name, input_name, output_name, input_optionals);
     }
 
-    void SumBlock::Compute()
+    void SumBlock::Compute(double t)
     {
         // Get the input
         Eigen::VectorXd val1 = Block::GetInput(input_ids_[0]);

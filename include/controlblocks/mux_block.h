@@ -22,7 +22,7 @@ namespace ControlBlock
         }
 
         void Init(std::string block_name = "Mux");
-        void Compute() override;
+        void Compute(double t) override;
         void Render() override;
         void Settings() override;
 

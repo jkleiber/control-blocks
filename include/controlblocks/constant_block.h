@@ -20,7 +20,7 @@ namespace ControlBlock
         }
 
         void Init(std::string block_name = "Constant");
-        void Compute() override;
+        void Compute(double t) override;
         void Render() override;
 
         // Serialization

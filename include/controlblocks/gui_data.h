@@ -1,6 +1,12 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
+static const std::vector<std::string> ode_solvers = {"RK4", "Cash-Karp54",
+                                                     "dopri5"};
+
 typedef struct gui_data_t
 {
     // Timing
@@ -13,5 +19,5 @@ typedef struct gui_data_t
     bool stop;
 
     // ODE solver
-    std::string solver = "Discrete";
+    std::string solver = ode_solvers[0];
 } GuiData;

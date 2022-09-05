@@ -17,7 +17,7 @@ namespace ControlBlock
         SumBlock(Diagram &diagram) : Block(diagram), min_node_width_(50.0) {}
 
         void Init(std::string block_name = "Sum");
-        void Compute() override;
+        void Compute(double t) override;
         void Render() override;
 
         // Serialization
