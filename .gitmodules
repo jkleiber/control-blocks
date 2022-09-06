@@ -1,6 +1,3 @@
-[submodule "third_party/zep"]
-	path = third_party/zep
-	url = git@github.com:Rezonality/zep.git
 [submodule "third_party/implot"]
 	path = third_party/implot
 	url = git@github.com:epezent/implot.git
@@ -13,3 +10,9 @@
 [submodule "third_party/imnodes"]
 	path = third_party/imnodes
 	url = git@github.com:jkleiber/imnodes.git
+[submodule "third_party/ImGuiColorTextEdit"]
+	path = third_party/ImGuiColorTextEdit
+	url = git@github.com:jkleiber/ImGuiColorTextEdit.git
+[submodule "third_party/nativefiledialog"]
+	path = third_party/nativefiledialog
+	url = git@github.com:mlabbe/nativefiledialog.git

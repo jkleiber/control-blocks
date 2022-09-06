@@ -1,18 +1,13 @@
-import dearpygui.dearpygui as dpg
+import numpy as np
 
-def save_callback():
-    print("Save Clicked")
+A = np.array([
+	[0, 1],
+	[0.5 0.5]])
+	
+B = np.array([[1],[-1]])
 
-dpg.create_context()
-dpg.create_viewport()
-dpg.setup_dearpygui()
+C = np.identity(2)
 
-with dpg.window(label="Example Window"):
-    dpg.add_text("Hello world")
-    dpg.add_button(label="Save", callback=save_callback)
-    dpg.add_input_text(label="string")
-    dpg.add_slider_float(label="float")
+D = np.array([[0],[0])
 
-dpg.show_viewport()
-dpg.start_dearpygui()
-dpg.destroy_context()
+

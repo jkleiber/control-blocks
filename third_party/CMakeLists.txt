@@ -68,3 +68,48 @@ target_link_libraries(IMNODES PUBLIC IMGUI)
 
 # ================= TOML++ ================
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tomlplusplus)
+
+# ========= ImGuiColorTextEdit ================
+add_library(ImGuiColorTextEdit STATIC)
+
+set(TEXTEDIT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ImGuiColorTextEdit)
+target_sources(ImGuiColorTextEdit
+    PRIVATE
+    ${TEXTEDIT_DIR}/TextEditor.cpp
+)
+
+target_include_directories(ImGuiColorTextEdit
+    PUBLIC ${TEXTEDIT_DIR}/
+)
+
+target_link_libraries(ImGuiColorTextEdit PUBLIC IMGUI)
+
+# ========= NFD ================
+add_library(NFD STATIC)
+
+set(NFD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog)
+
+if(WIN32)
+    target_sources(NFD
+        PRIVATE
+        ${NFD_DIR}/src/common.h
+        ${NFD_DIR}/src/nfd_common.c
+        ${NFD_DIR}/src/nfd_common.h
+        ${NFD_DIR}/src/nfd_win.cpp
+    )
+else()
+    target_sources(NFD
+        PRIVATE
+        ${NFD_DIR}/src/common.h
+        ${NFD_DIR}/src/nfd_common.c
+        ${NFD_DIR}/src/nfd_common.h
+        ${NFD_DIR}/src/nfd_gtk.c
+        ${NFD_DIR}/src/nfd_zenity.c
+        ${NFD_DIR}/src/simple_exec.h
+    )
+endif(WIN32)
+
+target_include_directories(NFD
+    PUBLIC
+    ${NFD_DIR}/src/include
+)

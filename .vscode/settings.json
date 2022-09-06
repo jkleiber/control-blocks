@@ -79,6 +79,20 @@
         "forward_list": "cpp",
         "regex": "cpp",
         "fft": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "hash_set": "cpp",
+        "barrier": "cpp",
+        "coroutine": "cpp",
+        "source_location": "cpp",
+        "rope": "cpp",
+        "slist": "cpp",
+        "latch": "cpp",
+        "ranges": "cpp",
+        "scoped_allocator": "cpp",
+        "shared_mutex": "cpp",
+        "span": "cpp",
+        "syncstream": "cpp"
     }
 }

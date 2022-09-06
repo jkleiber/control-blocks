@@ -6,7 +6,7 @@ project(
     ControlBlocks
     VERSION 0.1
     DESCRIPTION "Control system design application"
-    LANGUAGES CXX)
+    LANGUAGES C CXX)
 
 # Do static linking
 if(WIN32)

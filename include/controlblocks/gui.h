@@ -21,6 +21,7 @@
 #include "controlblocks/block.h"
 #include "controlblocks/diagram.h"
 #include "controlblocks/gui_data.h"
+#include "controlblocks/workspace.h"
 
 class Gui
 {
@@ -40,6 +41,7 @@ private:
     SDL_GLContext gl_context;
 
     Diagram diagram_;
+    Workspace workspace_;
     GuiData gui_data_;
 
     void Menubar();

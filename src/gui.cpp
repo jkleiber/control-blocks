@@ -71,6 +71,9 @@ void Gui::Init()
     // Setup ImPlot context
     ImPlot::CreateContext();
 
+    // Initialize the workspace
+    workspace_.Init();
+
     // Initialize the diagram
     diagram_.Init();
 }
@@ -97,6 +100,9 @@ void Gui::Update()
     // Show menubar and toolbar
     this->Menubar();
     this->Toolbar();
+
+    // Update the workspace
+    workspace_.Update();
 
     // Show the diagram
     diagram_.Update(gui_data_);

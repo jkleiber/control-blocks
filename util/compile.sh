@@ -13,7 +13,7 @@ cd $COMPILE_WD
 # Windows - Use msys and ninja to compile
 if [[ "$OSTYPE" == "msys" ]]; then
     # Build the code without the Gazebo simulation.
-    cmake .. -G Ninja -DCOMPILE_SIMULATION=0
+    cmake .. -G Ninja
     ninja
 else
     # Linux - use cmake and make

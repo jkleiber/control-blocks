@@ -10,4 +10,7 @@ else
 
     # Install clang-format
     sudo apt install -y clang-format libusb-1.0-0-dev
+
+    # Install gtk dependency for NFD library compilation
+    sudo apt-get install -y libgtk-3-dev
 fi
