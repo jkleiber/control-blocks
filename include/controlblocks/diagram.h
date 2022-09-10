@@ -28,7 +28,9 @@ using namespace boost::numeric::odeint;
 #endif
 
 #include "controlblocks/block.h"
+#include "controlblocks/file_utils.h"
 #include "controlblocks/gui_data.h"
+#include "controlblocks/gui_utils.h"
 #include "controlblocks/port.h"
 #include "controlblocks/sim_clock.h"
 #include "controlblocks/wire.h"
@@ -58,7 +60,11 @@ class Diagram
 {
 
 public:
-    Diagram() : num_items_(0), sim_running_(false), sim_paused_(false) {}
+    Diagram()
+        : num_items_(0), sim_running_(false), sim_paused_(false), filename_(""),
+          focus_(false)
+    {
+    }
     ~Diagram() {}
 
     Diagram(const Diagram &diagram)
@@ -206,6 +212,12 @@ private:
     runge_kutta_dopri5<state_type> rkd5_stepper;
     runge_kutta_cash_karp54<state_type> rkck54_stepper;
 
+    // File management
+    std::string filename_;
+
+    // Window management
+    bool focus_;
+
     // Diagram simulation
     void InitSim();
     void Compute(GuiData &gui_data);
@@ -215,10 +227,20 @@ private:
     void Dynamics(const state_type &x, state_type &dxdt, const double t);
 
     // Diagram rendering
+    void MenuBar();
     void Render();
     void AddBlockPopup();
     void EditWires();
     void EditSettings();
+
+    // Shortcuts
+    void Shortcuts();
+
+    // File operations
+    void NewDiagram();
+    void Load();
+    void Save();
+    void SaveAs();
 
     // Block removal
     void RemoveBlock(int id);

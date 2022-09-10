@@ -12,24 +12,33 @@ void Workspace::Update() { this->Render(); }
 void Workspace::Save()
 {
     // If the filename is empty then prompt for file dialog.
+    bool result = true;
     if (filename_.empty())
     {
-        filename_ = this->SaveFileDialog();
+        result = SaveFileDialog(&filename_);
     }
-    this->SaveFile();
+
+    // If the filename isn't empty or has been filled, save the file.
+    if (result)
+    {
+        this->SaveFile();
+    }
 }
 
 void Workspace::SaveAs()
 {
     // Save with a new filename
-    filename_ = this->SaveFileDialog();
-    this->SaveFile();
+    if (SaveFileDialog(&filename_))
+    {
+        this->SaveFile();
+    }
 }
 
 void Workspace::Load()
 {
     // Get the file to open
-    std::string path = this->OpenFileDialog();
+    std::string path = "";
+    OpenFileDialog(&path);
 
     // Only load if the filename is non-empty.
     // Note: this may be empty if the user canceled the open operation
@@ -51,52 +60,6 @@ void Workspace::Load()
     }
 }
 
-std::string Workspace::OpenFileDialog()
-{
-    nfdchar_t *out_path = NULL;
-    nfdresult_t result = NFD_OpenDialog(NULL, NULL, &out_path);
-
-    if (result == NFD_OKAY)
-    {
-        std::cout << "File: " << out_path << std::endl;
-        std::string path(out_path);
-        // TODO: check to see if this causes a memory leak.
-        return path;
-    }
-    else if (result == NFD_CANCEL)
-    {
-    }
-    else
-    {
-        printf("Error: %s\n", NFD_GetError());
-    }
-
-    return "";
-}
-
-std::string Workspace::SaveFileDialog()
-{
-    nfdchar_t *out_path = NULL;
-    nfdresult_t result = NFD_SaveDialog(NULL, NULL, &out_path);
-
-    if (result == NFD_OKAY)
-    {
-        std::cout << "File: " << out_path << std::endl;
-        std::string path(out_path);
-        // TODO: check to see if this causes a memory leak.
-        return path;
-    }
-    else if (result == NFD_CANCEL)
-    {
-    }
-    else
-    {
-        printf("Error: %s\n", NFD_GetError());
-    }
-
-    return "";
-}
-
 void Workspace::Render()
 {
     auto cpos = editor_.GetCursorPosition();
@@ -104,6 +67,37 @@ void Workspace::Render()
                  ImGuiWindowFlags_HorizontalScrollbar |
                      ImGuiWindowFlags_MenuBar);
     ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+
+    // Show menubar
+    this->MenuBar();
+
+    // Determine if the window has focus
+    this->focus_ =
+        ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+
+    ImGui::Text(
+        "%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1,
+        cpos.mColumn + 1, editor_.GetTotalLines(),
+        editor_.IsOverwrite() ? "Ovr" : "Ins", editor_.CanUndo() ? "*" : " ",
+        editor_.GetLanguageDefinition().mName.c_str(), this->filename_.c_str());
+
+    editor_.Render("TextEditor");
+    ImGui::End();
+
+    // Shortcuts enabled if focused on this window
+    if (focus_)
+    {
+        this->Shortcuts();
+    }
+}
+
+void Workspace::MenuBar()
+{
+    bool is_new = false;
+    bool is_open = false;
+    bool is_save = false;
+    bool is_save_as = false;
+
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -112,17 +106,17 @@ void Workspace::Render()
             {
                 this->NewFile();
             }
-            if (ImGui::MenuItem("Open", "Ctrl+O", nullptr, true))
+            else if (ImGui::MenuItem("Open", "Ctrl+O", nullptr, true))
             {
                 // Load file from a file dialog
                 this->Load();
             }
-            if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, true))
+            else if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, true))
             {
                 // Save the file
                 this->Save();
             }
-            if (ImGui::MenuItem("Save As..."))
+            else if (ImGui::MenuItem("Save As..."))
             {
                 // Save the file
                 this->SaveAs();
@@ -180,35 +174,23 @@ void Workspace::Render()
         }
         ImGui::EndMenuBar();
     }
+}
 
-    ImGui::Text(
-        "%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1,
-        cpos.mColumn + 1, editor_.GetTotalLines(),
-        editor_.IsOverwrite() ? "Ovr" : "Ins", editor_.CanUndo() ? "*" : " ",
-        editor_.GetLanguageDefinition().mName.c_str(), this->filename_.c_str());
-
-    editor_.Render("TextEditor");
-    ImGui::End();
-
-    // Shortcuts
-    // New
-    if ((ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) ||
-         ImGui::IsKeyDown(SDL_SCANCODE_RCTRL)) &&
-        ImGui::IsKeyDown(SDL_SCANCODE_N))
+void Workspace::Shortcuts()
+{
+    // Do actions from menu selections or shortcuts
+    if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                         SDL_SCANCODE_N))
     {
         this->NewFile();
     }
-    // Open
-    if ((ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) ||
-         ImGui::IsKeyDown(SDL_SCANCODE_RCTRL)) &&
-        ImGui::IsKeyDown(SDL_SCANCODE_O))
+    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                              SDL_SCANCODE_O))
     {
         this->Load();
     }
-    // Save
-    if ((ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) ||
-         ImGui::IsKeyDown(SDL_SCANCODE_RCTRL)) &&
-        ImGui::IsKeyDown(SDL_SCANCODE_S))
+    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                              SDL_SCANCODE_S))
     {
         this->Save();
     }

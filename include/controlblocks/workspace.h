@@ -5,16 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include <Python.h>
 #include <SDL.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-#include <nfd.h>
-#ifdef __cplusplus
-}
-#endif
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -23,10 +15,13 @@ extern "C"
 #endif
 #include "TextEditor.h"
 
+#include "controlblocks/file_utils.h"
+#include "controlblocks/gui_utils.h"
+
 class Workspace
 {
 public:
-    Workspace() {}
+    Workspace() : filename_(""), focus_(false) {}
     ~Workspace() {}
 
     void Init();
@@ -48,15 +43,17 @@ private:
     // Filename for workspace script
     std::string filename_;
 
-    // File operations
-    std::string OpenFileDialog();
-    std::string SaveFileDialog();
+    // Focus
+    bool focus_;
 
     /**
      * @brief Render the workspace script
      *
      */
     void Render();
+
+    void MenuBar();
+    void Shortcuts();
 
     /**
      * @brief Function to automatically save workspace

@@ -15,6 +15,9 @@ endif(WIN32)
 
 find_package(Boost 1.80 REQUIRED)
 
+# ================= Python ===============
+find_package(Python REQUIRED Development)
+
 # ============ Control Blocks ================
 
 # Note that headers are optional, and do not affect add_library, but they will
@@ -63,7 +66,8 @@ target_link_libraries(controlblocks_lib
     tomlplusplus_tomlplusplus
     ${Boost_LIBRARIES}
     ImGuiColorTextEdit
-    NFD)
+    NFD
+    Python::Python)
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)

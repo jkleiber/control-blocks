@@ -54,6 +54,8 @@ void Diagram::Update(GuiData &gui_data)
     auto flags = ImGuiWindowFlags_MenuBar;
     ImGui::Begin("Block Diagram", NULL, flags);
 
+    this->MenuBar();
+
     // Begin the diagram editor
     ImNodes::BeginNodeEditor();
 
@@ -66,6 +68,9 @@ void Diagram::Update(GuiData &gui_data)
 
     // Render the blocks in the diagram
     this->Render();
+
+    // Determine if the window has focus
+    focus_ = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
     // End the diagram editor
     ImNodes::EndNodeEditor();
@@ -83,6 +88,12 @@ void Diagram::Update(GuiData &gui_data)
         // Allow blocks to have settings edited when the simulation isn't
         // running
         this->EditSettings();
+
+        // Allow shortcuts when sim isn't running and this is focused
+        if (focus_)
+        {
+            this->Shortcuts();
+        }
     }
 }
 
@@ -740,6 +751,75 @@ void Diagram::Dynamics(const state_type &x, state_type &dxdt, const double t)
     dxdt = ControlUtils::StackVectors(dx_);
 }
 
+void Diagram::MenuBar()
+{
+    bool is_new = false;
+    bool is_open = false;
+    bool is_save = false;
+    bool is_save_as = false;
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            // TODO: on New/Open, prompt user to save unsaved work
+            if (ImGui::MenuItem("New", "Ctrl+N", nullptr, true))
+            {
+                this->NewDiagram();
+            }
+            else if (ImGui::MenuItem("Open", "Ctrl+O", nullptr, true))
+            {
+                this->Load();
+            }
+            else if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, true))
+            {
+                this->Save();
+            }
+            else if (ImGui::MenuItem("Save As..."))
+            {
+                this->SaveAs();
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
+    // Do actions from menu selections
+    if (is_new || (ImGui::IsWindowFocused() &&
+                   DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                                    SDL_SCANCODE_N)))
+    {
+        this->ClearDiagram();
+    }
+    else if (is_open || (ImGui::IsWindowFocused() &&
+                         DetectLRShortcut(SDL_SCANCODE_LCTRL,
+                                          SDL_SCANCODE_RCTRL, SDL_SCANCODE_O)))
+    {
+    }
+    else if (is_save || (ImGui::IsWindowFocused() &&
+                         DetectLRShortcut(SDL_SCANCODE_LCTRL,
+                                          SDL_SCANCODE_RCTRL, SDL_SCANCODE_S)))
+    {
+        // Save diagram
+        bool result = true;
+        if (filename_.empty())
+        {
+            result = SaveFileDialog(&filename_);
+        }
+
+        // Save if the filename is loaded or it was already set.
+        if (result)
+        {
+            this->SaveDiagram(filename_);
+        }
+    }
+    else if (is_save_as)
+    {
+    }
+}
+
 void Diagram::Render()
 {
     // Render each block according to its Render() function
@@ -793,6 +873,73 @@ void Diagram::EditSettings()
     for (size_t i = 0; i < blocks_.size(); ++i)
     {
         blocks_[i]->Settings();
+    }
+}
+
+void Diagram::Shortcuts()
+{
+    // Do actions from menu selections or shortcuts
+    if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                         SDL_SCANCODE_N))
+    {
+        this->NewDiagram();
+    }
+    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                              SDL_SCANCODE_O))
+    {
+        this->Load();
+    }
+    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                              SDL_SCANCODE_S))
+    {
+        this->Save();
+    }
+}
+
+void Diagram::NewDiagram()
+{
+    // Clear diagram
+    this->ClearDiagram();
+}
+
+void Diagram::Load()
+{
+    // Get the diagram to open
+    bool result = OpenFileDialog(&filename_);
+
+    // If the diagram is legit, then open it
+    if (result)
+    {
+        this->ClearDiagram();
+        this->LoadDiagram(filename_);
+    }
+}
+
+void Diagram::Save()
+{
+    // Save diagram
+    bool result = true;
+    if (filename_.empty())
+    {
+        result = SaveFileDialog(&filename_);
+    }
+
+    // Save if the filename is loaded or it was already set.
+    if (result)
+    {
+        this->SaveDiagram(filename_);
+    }
+}
+
+void Diagram::SaveAs()
+{
+    // Save diagram with new name
+    bool result = SaveFileDialog(&filename_);
+
+    // Save if the filename is loaded or it was already set.
+    if (result)
+    {
+        this->SaveDiagram(filename_);
     }
 }
 
