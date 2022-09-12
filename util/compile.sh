@@ -5,6 +5,8 @@ cd "$(dirname "$0")"
 UTIL_DIR="$(pwd)"
 COMPILE_WD="$(pwd)/../build"
 CONFIG_WD="$(pwd)/../config"
+EXE_DIR="$(pwd)/../build/apps"
+DLL_FILES="$(pwd)/../DLLs/*.dll"
 
 # Change to build directory
 cd $COMPILE_WD
@@ -15,6 +17,10 @@ if [[ "$OSTYPE" == "msys" ]]; then
     # Build the code without the Gazebo simulation.
     cmake .. -G Ninja
     ninja
+
+    # Copy DLLs into the executable's folder
+    echo "cp $DLL_FILES $EXE_DIR"
+    cp $DLL_FILES $EXE_DIR
 else
     # Linux - use cmake and make
 

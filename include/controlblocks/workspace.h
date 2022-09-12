@@ -46,6 +46,9 @@ private:
     // Focus
     bool focus_;
 
+    // Run the active file
+    void RunFile();
+
     /**
      * @brief Render the workspace script
      *

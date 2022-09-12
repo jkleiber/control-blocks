@@ -162,6 +162,15 @@ void Workspace::MenuBar()
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Run"))
+        {
+            if (ImGui::MenuItem("Run File", "Ctrl+R"))
+            {
+                this->RunFile();
+            }
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("View"))
         {
             if (ImGui::MenuItem("Dark Mode"))
@@ -174,6 +183,29 @@ void Workspace::MenuBar()
         }
         ImGui::EndMenuBar();
     }
+}
+
+void Workspace::RunFile()
+{
+    // Get program name
+    wchar_t *program = Py_DecodeLocale(filename_.c_str(), NULL);
+
+    if (program == NULL)
+    {
+        fprintf(stderr, "Fatal error: cannot decode %s\n", filename_.c_str());
+    }
+
+    Py_SetProgramName(program); /* optional but recommended */
+    Py_Initialize();
+    PyRun_SimpleString("from time import time,ctime\n"
+                       "print('Today is', ctime(time()))\n");
+
+    if (Py_FinalizeEx() < 0)
+    {
+        std::cout << "ERROR\n";
+    }
+
+    PyMem_RawFree(program);
 }
 
 void Workspace::Shortcuts()
@@ -193,6 +225,11 @@ void Workspace::Shortcuts()
                               SDL_SCANCODE_S))
     {
         this->Save();
+    }
+    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
+                              SDL_SCANCODE_R))
+    {
+        this->RunFile();
     }
 }
 

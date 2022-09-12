@@ -16,7 +16,11 @@ endif(WIN32)
 find_package(Boost 1.80 REQUIRED)
 
 # ================= Python ===============
+# set(BUILD_SHARED_LIBS OFF)
 find_package(Python REQUIRED Development)
+
+message("PYTHON LIBS: ${Python_LIBRARIES} ")
+message("PYTHON LIB DIRS: ${Python_LIBRARY_DIRS} ")
 
 # ============ Control Blocks ================
 
@@ -32,7 +36,8 @@ file(GLOB SOURCE_LIST
 
 # Make an automatic library - will be static or dynamic based on user setting
 add_library(controlblocks_lib STATIC ${SOURCE_LIST} ${HEADER_LIST})
-set_target_properties(controlblocks_lib PROPERTIES LINKER_LANGUAGE CXX)
+
+# set_target_properties(controlblocks_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 # HACK: Remove when Boost fixes odeint deprecation warnings
 target_compile_options(controlblocks_lib PRIVATE -Wno-deprecated)
@@ -40,6 +45,7 @@ target_compile_options(controlblocks_lib PRIVATE -Wno-deprecated)
 # We need the top level include directory as well as the imgui ones.
 get_target_property(IMGUI_INCLUDES IMGUI INCLUDE_DIRECTORIES)
 
+# Platform specific build setup
 if(WIN32)
     get_target_property(EIGEN_INCLUDES Eigen3::Eigen INCLUDE_DIRECTORIES)
     target_include_directories(controlblocks_lib
@@ -47,27 +53,29 @@ if(WIN32)
         ../include
         ${IMGUI_INCLUDES}
         ${EIGEN_INCLUDES}
-        ${Boost_INCLUDE_DIRS})
+        ${Boost_INCLUDE_DIRS}
+        ${Python_INCLUDE_DIRS})
 else()
     target_include_directories(controlblocks_lib
         PUBLIC
         ../include
         ${IMGUI_INCLUDES}
-        ${Boost_INCLUDE_DIRS})
+        ${Boost_INCLUDE_DIRS}
+        ${Python_INCLUDE_DIRS})
 endif(WIN32)
 
 # Add all the packages that need to be linked.
 target_link_libraries(controlblocks_lib
     PUBLIC
-    Eigen3::Eigen
     IMGUI
+    Eigen3::Eigen
     IMPLOT
     IMNODES
     tomlplusplus_tomlplusplus
     ${Boost_LIBRARIES}
     ImGuiColorTextEdit
     NFD
-    Python::Python)
+    ${Python_LIBRARIES})
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)
