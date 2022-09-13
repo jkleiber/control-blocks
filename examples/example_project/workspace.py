@@ -1,2 +1,10 @@
-blocks = []
-min_id = 2147483647
+
+def run():
+	print("hello")
+	
+	A = 5
+	B = 1
+	
+	return {"A": A, "B": B}
+
+

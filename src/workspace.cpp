@@ -187,25 +187,127 @@ void Workspace::MenuBar()
 
 void Workspace::RunFile()
 {
-    // Get program name
-    wchar_t *program = Py_DecodeLocale(filename_.c_str(), NULL);
+    // Save the file
+    this->Save();
 
-    if (program == NULL)
+    if (!filename_.empty())
     {
-        fprintf(stderr, "Fatal error: cannot decode %s\n", filename_.c_str());
+        // Get program name
+        // std::string ws_name = "python";
+        wchar_t *program = Py_DecodeLocale(filename_.c_str(), NULL);
+
+        if (program == NULL)
+        {
+            fprintf(stderr, "Fatal error: cannot decode %s\n",
+                    filename_.c_str());
+        }
+
+        // Text
+        // std::string code_str = editor_.GetText();
+        FILE *fp;
+        fp = fopen(filename_.c_str(), "r");
+        if (fp != NULL)
+        {
+
+            Py_SetProgramName(program); /* optional but recommended */
+            // PYTHONHOME must be set to C:\Program
+            // Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.2032.0_x64__qbz5n2kfra8p0
+            Py_Initialize();
+            // PyRun_SimpleString("import numpy as np\n"
+            //                    "A = np.identity(2)\n"
+            //                    "print('A=', A)\n");
+
+            // PyRun_SimpleString(code_str.c_str());
+            // PyObject globals, locals;
+            // PyObject *result, *keys;
+            // // std::cout << code_str << std::endl;
+
+            // // PyRun_String(code_str.c_str(), 1, &globals, &locals);
+            // result = PyRun_File(fp, filename_.c_str(), 0, &globals, &locals);
+            // // keys = PyMapping_Keys(&globals);
+
+            // if (result)
+            // {
+            //     std::cout << "result GOOD\n" << std::flush;
+            //     // PyObject_Print(&globals, stdout, 12);
+            // }
+            // else
+            // {
+            //     std::cout << "result NULL\n" << std::flush;
+            // }
+
+            /**
+             * @brief Example code below
+             *
+             */
+            // PyObject *p_name, *p_module, *p_func, *p_val;
+
+            // p_name = PyUnicode_DecodeFSDefault("workspace");
+            // if (p_name != NULL)
+            // {
+            //     p_module = PyImport_Import(p_name);
+            //     Py_DECREF(p_name);
+
+            //     if (p_module != NULL)
+            //     {
+            //         std::cout << "found workspace\n" << std::flush;
+
+            //         // Assuming the function is "run()"
+            //         p_func = PyObject_GetAttrString(p_module, "run");
+
+            //         if (p_func && PyCallable_Check(p_func))
+            //         {
+            //             std::cout << "found run()\n" << std::flush;
+
+            //             // Call the function
+            //             p_val = PyObject_CallObject(p_func, NULL);
+
+            //             if (p_val)
+            //             {
+            //                 std::cout << "Call Success\n" << std::flush;
+            //                 PyObject_Print(p_val, stdout, 0);
+            //                 Py_DECREF(p_val);
+            //             }
+            //             else
+            //             {
+            //                 std::cout << "Call failed\n" << std::flush;
+            //                 Py_DECREF(p_func);
+            //                 Py_DECREF(p_module);
+            //             }
+            //         }
+            //         else
+            //         {
+            //             if (PyErr_Occurred())
+            //             {
+            //                 PyErr_Print();
+            //             }
+            //         }
+            //         Py_XDECREF(p_func);
+            //         Py_DECREF(p_module);
+            //     }
+            //     else
+            //     {
+            //         PyErr_Print();
+            //     }
+            // }
+
+            // if (locals != nullptr)
+            // {
+            //     std::cout << locals->ob_refcnt << std::endl;
+            // }
+            // else
+            // {
+            //     std::cout << "Locals nullptr\n";
+            // }
+
+            if (Py_FinalizeEx() < 0)
+            {
+                std::cout << "ERROR\n";
+            }
+
+            PyMem_RawFree(program);
+        }
     }
-
-    Py_SetProgramName(program); /* optional but recommended */
-    Py_Initialize();
-    PyRun_SimpleString("from time import time,ctime\n"
-                       "print('Today is', ctime(time()))\n");
-
-    if (Py_FinalizeEx() < 0)
-    {
-        std::cout << "ERROR\n";
-    }
-
-    PyMem_RawFree(program);
 }
 
 void Workspace::Shortcuts()
@@ -221,13 +323,13 @@ void Workspace::Shortcuts()
     {
         this->Load();
     }
-    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
-                              SDL_SCANCODE_S))
+    else if (save_latch_.Get(DetectLRShortcut(
+                 SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL, SDL_SCANCODE_S)))
     {
         this->Save();
     }
-    else if (DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
-                              SDL_SCANCODE_R))
+    else if (run_latch_.Get(DetectLRShortcut(
+                 SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL, SDL_SCANCODE_R)))
     {
         this->RunFile();
     }

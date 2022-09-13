@@ -11,3 +11,14 @@ bool DetectLRShortcut(SDL_Scancode code_left, SDL_Scancode code_right,
     return ((ImGui::IsKeyDown(code_left) || ImGui::IsKeyDown(code_right)) &&
             ImGui::IsKeyDown(code2));
 }
+
+bool Latch::Get(bool gate)
+{
+    if (gate != value_)
+    {
+        value_ = gate;
+        return gate;
+    }
+
+    return false;
+}

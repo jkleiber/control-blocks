@@ -46,6 +46,10 @@ private:
     // Focus
     bool focus_;
 
+    // Latching for shortcuts
+    Latch save_latch_;
+    Latch run_latch_;
+
     // Run the active file
     void RunFile();
 

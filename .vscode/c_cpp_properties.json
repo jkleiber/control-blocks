@@ -7,7 +7,8 @@
                 "${workspaceFolder}/third_party/imnodes",
                 "${workspaceFolder}/third_party/tomlplusplus",
                 "${workspaceFolder}/third_party/tomlplusplus/include",
-                "C:\\boost_1_80_0\\"
+                "C:\\boost_1_80_0\\",
+                "C:/msys64/mingw64/include/python3.10"
             ],
             "defines": [
                 "_DEBUG",
