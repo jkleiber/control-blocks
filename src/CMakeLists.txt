@@ -15,13 +15,6 @@ endif(WIN32)
 
 find_package(Boost 1.80 REQUIRED)
 
-# ================= Python ===============
-# set(BUILD_SHARED_LIBS OFF)
-find_package(Python REQUIRED Development)
-
-message("PYTHON LIBS: ${Python_LIBRARIES} ")
-message("PYTHON LIB DIRS: ${Python_LIBRARY_DIRS} ")
-
 # ============ Control Blocks ================
 
 # Note that headers are optional, and do not affect add_library, but they will
@@ -75,7 +68,8 @@ target_link_libraries(controlblocks_lib
     ${Boost_LIBRARIES}
     ImGuiColorTextEdit
     NFD
-    ${Python_LIBRARIES})
+    ${Python_LIBRARIES}
+    pybind11::embed)
 
 # All users of this library will need at least C++17
 target_compile_features(controlblocks_lib PUBLIC cxx_std_17)

@@ -1,11 +1,18 @@
 #include "controlblocks/workspace.h"
 
+namespace py = pybind11;
+
 void Workspace::Init()
 {
     // Set the language
     auto lang = TextEditor::LanguageDefinition::Python();
     editor_.SetLanguageDefinition(lang);
+
+    // Initialize the python interpreter
+    py::initialize_interpreter();
 }
+
+void Workspace::Stop() { py::finalize_interpreter(); }
 
 void Workspace::Update() { this->Render(); }
 
@@ -192,121 +199,13 @@ void Workspace::RunFile()
 
     if (!filename_.empty())
     {
-        // Get program name
-        // std::string ws_name = "python";
-        wchar_t *program = Py_DecodeLocale(filename_.c_str(), NULL);
+        // Get the interpreter scope
+        py::object scope = py::module_::import("__main__").attr("__dict__");
 
-        if (program == NULL)
-        {
-            fprintf(stderr, "Fatal error: cannot decode %s\n",
-                    filename_.c_str());
-        }
+        // Evaluate a file.
+        py::eval_file(filename_, scope);
 
-        // Text
-        // std::string code_str = editor_.GetText();
-        FILE *fp;
-        fp = fopen(filename_.c_str(), "r");
-        if (fp != NULL)
-        {
-
-            Py_SetProgramName(program); /* optional but recommended */
-            // PYTHONHOME must be set to C:\Program
-            // Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.2032.0_x64__qbz5n2kfra8p0
-            Py_Initialize();
-            // PyRun_SimpleString("import numpy as np\n"
-            //                    "A = np.identity(2)\n"
-            //                    "print('A=', A)\n");
-
-            // PyRun_SimpleString(code_str.c_str());
-            // PyObject globals, locals;
-            // PyObject *result, *keys;
-            // // std::cout << code_str << std::endl;
-
-            // // PyRun_String(code_str.c_str(), 1, &globals, &locals);
-            // result = PyRun_File(fp, filename_.c_str(), 0, &globals, &locals);
-            // // keys = PyMapping_Keys(&globals);
-
-            // if (result)
-            // {
-            //     std::cout << "result GOOD\n" << std::flush;
-            //     // PyObject_Print(&globals, stdout, 12);
-            // }
-            // else
-            // {
-            //     std::cout << "result NULL\n" << std::flush;
-            // }
-
-            /**
-             * @brief Example code below
-             *
-             */
-            // PyObject *p_name, *p_module, *p_func, *p_val;
-
-            // p_name = PyUnicode_DecodeFSDefault("workspace");
-            // if (p_name != NULL)
-            // {
-            //     p_module = PyImport_Import(p_name);
-            //     Py_DECREF(p_name);
-
-            //     if (p_module != NULL)
-            //     {
-            //         std::cout << "found workspace\n" << std::flush;
-
-            //         // Assuming the function is "run()"
-            //         p_func = PyObject_GetAttrString(p_module, "run");
-
-            //         if (p_func && PyCallable_Check(p_func))
-            //         {
-            //             std::cout << "found run()\n" << std::flush;
-
-            //             // Call the function
-            //             p_val = PyObject_CallObject(p_func, NULL);
-
-            //             if (p_val)
-            //             {
-            //                 std::cout << "Call Success\n" << std::flush;
-            //                 PyObject_Print(p_val, stdout, 0);
-            //                 Py_DECREF(p_val);
-            //             }
-            //             else
-            //             {
-            //                 std::cout << "Call failed\n" << std::flush;
-            //                 Py_DECREF(p_func);
-            //                 Py_DECREF(p_module);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             if (PyErr_Occurred())
-            //             {
-            //                 PyErr_Print();
-            //             }
-            //         }
-            //         Py_XDECREF(p_func);
-            //         Py_DECREF(p_module);
-            //     }
-            //     else
-            //     {
-            //         PyErr_Print();
-            //     }
-            // }
-
-            // if (locals != nullptr)
-            // {
-            //     std::cout << locals->ob_refcnt << std::endl;
-            // }
-            // else
-            // {
-            //     std::cout << "Locals nullptr\n";
-            // }
-
-            if (Py_FinalizeEx() < 0)
-            {
-                std::cout << "ERROR\n";
-            }
-
-            PyMem_RawFree(program);
-        }
+        // Keep track of the workspace scope somehow here
     }
 }
 
@@ -350,16 +249,30 @@ void Workspace::NewFile()
 void Workspace::SaveFile()
 {
     // Only save if the filename isn't empty.
-    // Note: this could still be empty if the user canceled the save operation.
+    // Note: this check is necessary because the filename could still be empty
+    // if the user canceled the save operation.
     if (!filename_.empty())
     {
-        // Get text to save
-        auto textToSave = editor_.GetText();
+        // Get text lines to save
+        auto text_lines = editor_.GetTextLines();
 
-        // Save text
+        // Save text line by line
         std::ofstream file(filename_,
                            std::ofstream::out | std::ofstream::trunc);
-        file << textToSave << std::flush;
+        for (size_t i = 0; i < text_lines.size(); ++i)
+        {
+            // Add the line to the file
+            file << text_lines[i];
+
+            // Only add newlines if the file isn't about to end.
+            if (i < (text_lines.size() - 1))
+            {
+                file << std::endl;
+            }
+        }
+
+        // Flush the buffer and close the file
+        file << std::flush;
         file.close();
     }
 }

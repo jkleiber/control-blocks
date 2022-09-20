@@ -113,3 +113,12 @@ target_include_directories(NFD
     PUBLIC
     ${NFD_DIR}/src/include
 )
+
+# ================ PyBind11 ==============
+# Find Python
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+message("PYTHON LIBS: ${Python_LIBRARIES} ")
+message("PYTHON LIB DIRS: ${Python_LIBRARY_DIRS} ")
+
+# Build PyBind11
+add_subdirectory(pybind11)

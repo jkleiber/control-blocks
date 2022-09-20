@@ -5,8 +5,11 @@
 #include <iostream>
 #include <string>
 
-#include <Python.h>
+// #include <Python.h>
 #include <SDL.h>
+#include <pybind11/embed.h>
+#include <pybind11/eval.h>
+#include <pybind11/pybind11.h>
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -25,6 +28,7 @@ public:
     ~Workspace() {}
 
     void Init();
+    void Stop();
 
     // Display
     void Update();

@@ -127,6 +127,9 @@ void Gui::Render()
 
 void Gui::Stop()
 {
+    // Shutdown the workspace
+    workspace_.Stop();
+
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
