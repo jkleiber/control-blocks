@@ -5,12 +5,14 @@
 #include <iostream>
 #include <string>
 
-// #include <Python.h>
-#include <SDL.h>
 #include <pybind11/embed.h>
 #include <pybind11/eval.h>
 #include <pybind11/pybind11.h>
 
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl.h"
+#include <SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
 #else
@@ -18,6 +20,7 @@
 #endif
 #include "TextEditor.h"
 
+#include "controlblocks/console.h"
 #include "controlblocks/file_utils.h"
 #include "controlblocks/gui_utils.h"
 
@@ -43,6 +46,9 @@ public:
 private:
     // Editor
     TextEditor editor_;
+
+    // Console
+    Console console_;
 
     // Filename for workspace script
     std::string filename_;

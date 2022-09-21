@@ -10,6 +10,10 @@ void Workspace::Init()
 
     // Initialize the python interpreter
     py::initialize_interpreter();
+
+    // Redirect python to internal console
+    py::module::import("py_console");
+    py::module::import("sys").attr("stdout") = console_;
 }
 
 void Workspace::Stop() { py::finalize_interpreter(); }
@@ -96,6 +100,9 @@ void Workspace::Render()
     {
         this->Shortcuts();
     }
+
+    // Also render the console
+    console_.Render();
 }
 
 void Workspace::MenuBar()
@@ -206,6 +213,8 @@ void Workspace::RunFile()
         py::eval_file(filename_, scope);
 
         // Keep track of the workspace scope somehow here
+        // py::exec("print(A)", scope);
+        py::dict global_vars = py::globals();
     }
 }
 

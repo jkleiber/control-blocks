@@ -11,6 +11,16 @@
 
 #include "controlblocks/gui.h"
 
+#include <pybind11/embed.h>
+namespace py = pybind11;
+
+PYBIND11_EMBEDDED_MODULE(py_console, module)
+{
+    py::class_<Console>(module, "stdout")
+        .def("write", &Console::Write)
+        .def("flush", &Console::Flush);
+}
+
 int main(int argc, char **argv)
 {
     // Initialize the GUI
