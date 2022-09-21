@@ -215,6 +215,12 @@ void Workspace::RunFile()
         // Keep track of the workspace scope somehow here
         // py::exec("print(A)", scope);
         py::dict global_vars = py::globals();
+
+        for (auto item : global_vars)
+        {
+            std::cout << "key: " << item.first << ", value=" << item.second
+                      << std::endl;
+        }
     }
 }
 

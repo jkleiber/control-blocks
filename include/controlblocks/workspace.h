@@ -3,11 +3,13 @@
 
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 
 #include <pybind11/embed.h>
 #include <pybind11/eval.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"

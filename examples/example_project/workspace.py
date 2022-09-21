@@ -1,4 +1,6 @@
 
+# import numpy as np
+
 print('yeee')
 
 A = 4

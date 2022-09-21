@@ -18,7 +18,7 @@
 class Console
 {
 public:
-    Console() {}
+    Console() : auto_scroll_(true), scroll_to_bottom_(false) {}
     ~Console() {}
 
     void Render();
@@ -33,4 +33,8 @@ public:
 
 private:
     std::vector<std::string> output_;
+
+    // Console properties
+    bool auto_scroll_;
+    bool scroll_to_bottom_;
 };
