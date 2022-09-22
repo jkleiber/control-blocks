@@ -18,7 +18,7 @@
 class Console
 {
 public:
-    Console() : auto_scroll_(true), scroll_to_bottom_(false) {}
+    Console() : id_(1), auto_scroll_(true), scroll_to_bottom_(false) {}
     ~Console() {}
 
     void Render();
@@ -27,12 +27,18 @@ public:
     void Clear();
     void Save();
 
+    // Console properties
+    int NumLines();
+
     // Python redirection
     void Write(std::string str);
     void Flush();
 
 private:
-    std::vector<std::string> output_;
+    static std::vector<std::string> output_;
+
+    // Debugging
+    int id_;
 
     // Console properties
     bool auto_scroll_;

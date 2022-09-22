@@ -1,15 +1,10 @@
 #include "controlblocks/console.h"
 
+std::vector<std::string> Console::output_;
+
 void Console::Render()
 {
     ImGui::Begin("Console", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
-
-    ImGui::TextWrapped(
-        "This example implements a console with basic coloring, completion "
-        "(TAB key) and history (Up/Down keys). A more elaborate "
-        "implementation may want to store entries along with extra data such "
-        "as timestamp, emitter, etc.");
-    ImGui::TextWrapped("Enter 'HELP' for help.");
 
     ImGui::SameLine();
     bool copy_to_clipboard = ImGui::SmallButton("Copy");
@@ -76,7 +71,6 @@ void Console::Render()
     for (int i = 0; i < output_.size(); i++)
     {
         const char *item = output_[i].c_str();
-        std::cout << output_[i] << std::flush;
 
         // Normally you would store more information in your item than just a
         // string. (e.g. make Items[] an array of structure, store color/type
@@ -142,13 +136,13 @@ void Console::Clear() { output_.clear(); }
 
 void Console::Save() {}
 
+int Console::NumLines() { return output_.size(); }
+
 void Console::Write(std::string str)
 {
     // Write to the console.
     // TODO: limit console size.
     output_.push_back(str);
-    // std::cout << "log size: " << output_.size() << std::endl;
-    std::cout << str << std::flush;
 }
 
 void Console::Flush() { std::cout << std::flush; }
