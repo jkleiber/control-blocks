@@ -71,6 +71,8 @@ void Console::Render()
                         ImVec2(4, 1)); // Tighten spacing
     if (copy_to_clipboard)
         ImGui::LogToClipboard();
+
+    // std::cout << output_.size() << std::endl << std::flush;
     for (int i = 0; i < output_.size(); i++)
     {
         const char *item = output_[i].c_str();
@@ -145,7 +147,7 @@ void Console::Write(std::string str)
     // Write to the console.
     // TODO: limit console size.
     output_.push_back(str);
-    std::cout << "log size: " << output_.size() << std::endl;
+    // std::cout << "log size: " << output_.size() << std::endl;
     std::cout << str << std::flush;
 }
 
