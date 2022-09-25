@@ -6,12 +6,8 @@ void Console::Render()
 {
     ImGui::Begin("Console", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
 
-    ImGui::SameLine();
-    bool copy_to_clipboard = ImGui::SmallButton("Copy");
     // static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t =
     // ImGui::GetTime(); AddLog("Spam %f", t); }
-
-    ImGui::Separator();
 
     // Options menu
     if (ImGui::BeginPopup("Options"))
@@ -20,11 +16,12 @@ void Console::Render()
         ImGui::EndPopup();
     }
 
-    // Options, Filter
     if (ImGui::Button("Options"))
         ImGui::OpenPopup("Options");
-    ImGui::SameLine();
+
     ImGui::Separator();
+
+    // Options, Filter
 
     // Reserve enough left-over height for 1 separator + 1 input text
     const float footer_height_to_reserve =
@@ -64,8 +61,6 @@ void Console::Render()
     // decoration from your items.
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
                         ImVec2(4, 1)); // Tighten spacing
-    if (copy_to_clipboard)
-        ImGui::LogToClipboard();
 
     // std::cout << output_.size() << std::endl << std::flush;
     for (int i = 0; i < output_.size(); i++)
@@ -93,8 +88,6 @@ void Console::Render()
         if (has_color)
             ImGui::PopStyleColor();
     }
-    if (copy_to_clipboard)
-        ImGui::LogFinish();
 
     if (scroll_to_bottom_ ||
         (auto_scroll_ && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))

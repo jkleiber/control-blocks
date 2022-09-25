@@ -216,10 +216,14 @@ void Workspace::RunFile()
         // py::exec("print(A)", scope);
         py::dict global_vars = py::globals();
 
-        for (auto item : global_vars)
+        try
         {
-            std::cout << "key: " << item.first << ", value=" << item.second
-                      << std::endl;
+            Eigen::MatrixXd A = this->GetVariable<Eigen::MatrixXd>("A");
+            std::cout << A << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
         }
     }
 }

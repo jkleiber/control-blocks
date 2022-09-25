@@ -6,7 +6,7 @@ sys.path.append('C:\\Users\\jklei\\AppData\\Local\\Packages\\PythonSoftwareFound
 import numpy as np
 import matplotlib.pyplot as plt
 
-A = 4
+A = np.identity(4)
 B = 3
 C = A + B
 D = np.identity(2)
@@ -14,8 +14,8 @@ D = np.identity(2)
 print(A)
 print(D)
 
-x = np.linspace(0,1,10)
-y = 5*x + 4
+#x = np.linspace(0,1,10)
+#y = 5*x + 4
 
-plt.scatter(x,y)
-plt.show()
+#plt.scatter(x,y)
+#plt.show()
