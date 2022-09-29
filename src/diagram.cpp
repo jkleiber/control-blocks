@@ -1,5 +1,10 @@
 #include "controlblocks/diagram.h"
 
+#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+namespace py = pybind11;
+
 void Diagram::Init()
 {
     /*
@@ -12,15 +17,15 @@ void Diagram::Update(GuiData &gui_data)
     // Handle GUI events
     if (gui_data.start && !sim_running_)
     {
+        // Set the simulation to running.
+        sim_paused_ = false;
+        sim_running_ = true;
+
         // Reset the simulation if the simulator wasn't previously paused.
         if (!sim_paused_)
         {
             this->InitSim();
         }
-
-        // Set the simulation to running.
-        sim_paused_ = false;
-        sim_running_ = true;
     }
     if (gui_data.pause && sim_running_)
     {
@@ -576,7 +581,16 @@ void Diagram::InitSim()
     // Initialize all dynamical systems
     for (std::shared_ptr<ControlBlock::Block> dblk : dyn_blocks_)
     {
-        dblk->ApplyInitial();
+        try
+        {
+            dblk->ApplyInitial();
+        }
+        catch (std::exception &e)
+        {
+            // Don't let the sim proceed with running.
+            sim_running_ = false;
+            py::print(e.what());
+        }
     }
 }
 
@@ -753,10 +767,6 @@ void Diagram::Dynamics(const state_type &x, state_type &dxdt, const double t)
 
 void Diagram::MenuBar()
 {
-    bool is_new = false;
-    bool is_open = false;
-    bool is_save = false;
-    bool is_save_as = false;
 
     if (ImGui::BeginMenuBar())
     {
@@ -785,39 +795,6 @@ void Diagram::MenuBar()
 
         ImGui::EndMenuBar();
     }
-
-    // Do actions from menu selections
-    if (is_new || (ImGui::IsWindowFocused() &&
-                   DetectLRShortcut(SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
-                                    SDL_SCANCODE_N)))
-    {
-        this->ClearDiagram();
-    }
-    else if (is_open || (ImGui::IsWindowFocused() &&
-                         DetectLRShortcut(SDL_SCANCODE_LCTRL,
-                                          SDL_SCANCODE_RCTRL, SDL_SCANCODE_O)))
-    {
-    }
-    else if (is_save || (ImGui::IsWindowFocused() &&
-                         DetectLRShortcut(SDL_SCANCODE_LCTRL,
-                                          SDL_SCANCODE_RCTRL, SDL_SCANCODE_S)))
-    {
-        // Save diagram
-        bool result = true;
-        if (filename_.empty())
-        {
-            result = SaveFileDialog(&filename_);
-        }
-
-        // Save if the filename is loaded or it was already set.
-        if (result)
-        {
-            this->SaveDiagram(filename_);
-        }
-    }
-    else if (is_save_as)
-    {
-    }
 }
 
 void Diagram::Render()
@@ -826,6 +803,12 @@ void Diagram::Render()
     for (size_t i = 0; i < blocks_.size(); ++i)
     {
         blocks_[i]->Render();
+    }
+
+    // Render the dynamical system blocks.
+    for (size_t i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        dyn_blocks_[i]->Render();
     }
 
     // Render each wire
@@ -873,6 +856,11 @@ void Diagram::EditSettings()
     for (size_t i = 0; i < blocks_.size(); ++i)
     {
         blocks_[i]->Settings();
+    }
+
+    for (size_t i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        dyn_blocks_[i]->Settings();
     }
 }
 
@@ -987,6 +975,10 @@ void Diagram::AddBlockPopup()
         {
             this->AddBlock<ControlBlock::MuxBlock>(click_pos);
         }
+        else if (ImGui::MenuItem("State Space"))
+        {
+            this->AddBlock<ControlBlock::StateSpaceBlock>(click_pos);
+        }
 
         ImGui::EndPopup(); // end "Add Block"
     }
@@ -1008,6 +1000,24 @@ std::shared_ptr<ControlBlock::Port> Diagram::GetPortByImNodesId(int id)
 
         // Otherwise check to see if this block has an output port with this ID
         p = blocks_[i]->FindOutputPortByImNodesId(id);
+        if (p != nullptr)
+        {
+            return p;
+        }
+    }
+
+    // Look through each dynamics block and find the port based on ID and type
+    for (size_t i = 0; i < dyn_blocks_.size(); ++i)
+    {
+        // See if this block has an input port with this ID
+        p = dyn_blocks_[i]->FindInputPortByImNodesId(id);
+        if (p != nullptr)
+        {
+            return p;
+        }
+
+        // Otherwise check to see if this block has an output port with this ID
+        p = dyn_blocks_[i]->FindOutputPortByImNodesId(id);
         if (p != nullptr)
         {
             return p;

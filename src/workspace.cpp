@@ -18,7 +18,11 @@ void Workspace::Init()
 
 void Workspace::Stop() { py::finalize_interpreter(); }
 
-void Workspace::Update() { this->Render(); }
+void Workspace::Update()
+{
+    // Render the script editor and console.
+    this->Render();
+}
 
 void Workspace::Save()
 {
@@ -211,20 +215,6 @@ void Workspace::RunFile()
 
         // Evaluate a file.
         py::eval_file(filename_, scope);
-
-        // Keep track of the workspace scope somehow here
-        // py::exec("print(A)", scope);
-        py::dict global_vars = py::globals();
-
-        try
-        {
-            Eigen::MatrixXd A = this->GetVariable<Eigen::MatrixXd>("A");
-            std::cout << A << std::endl;
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << e.what() << '\n';
-        }
     }
 }
 

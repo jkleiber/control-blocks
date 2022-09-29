@@ -15,6 +15,7 @@
 #include "controlblocks/serializable.h"
 
 class Diagram;
+class Workspace;
 
 namespace ControlBlock
 {

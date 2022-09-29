@@ -25,6 +25,7 @@
 
 #include "controlblocks/console.h"
 #include "controlblocks/file_utils.h"
+#include "controlblocks/gui_data.h"
 #include "controlblocks/gui_utils.h"
 
 namespace py = pybind11;
@@ -45,27 +46,6 @@ public:
     void Save();
     void SaveAs();
     void Load();
-
-    template <typename T> T GetVariable(const std::string name)
-    {
-        py::dict global_vars = py::globals();
-        if (global_vars.contains(name))
-        {
-            try
-            {
-                T val = global_vars[name.c_str()].cast<T>();
-                return val;
-            }
-            catch (const std::exception &e)
-            {
-                throw std::runtime_error("Error: variable '" + name +
-                                         "' cannot be cast to specified type");
-            }
-        }
-
-        throw std::runtime_error("Error: variable '" + name +
-                                 "' does not exist in workspace");
-    }
 
 private:
     // Editor

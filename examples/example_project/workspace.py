@@ -4,14 +4,16 @@ sys.path.append('C:\\Users\\jklei\\AppData\\Local\\Packages\\PythonSoftwareFound
 
 # Imports
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-A = np.identity(4)
-B = 3
-C = A + B
-D = np.identity(2)
+A = np.identity(1)
+B = np.zeros(1)
+C = np.identity(1)
+D = np.zeros(1)
 
 print(A)
+print(B)
+print(C)
 print(D)
 
 #x = np.linspace(0,1,10)

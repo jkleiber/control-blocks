@@ -40,7 +40,9 @@ using namespace boost::numeric::odeint;
 #include "controlblocks/display_block.h"
 #include "controlblocks/gain_block.h"
 #include "controlblocks/mux_block.h"
+#include "controlblocks/state_space_block.h"
 #include "controlblocks/sum_block.h"
+
 
 using namespace std::placeholders;
 

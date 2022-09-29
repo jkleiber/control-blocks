@@ -20,4 +20,5 @@ typedef struct gui_data_t
 
     // ODE solver
     std::string solver = ode_solvers[0];
+
 } GuiData;

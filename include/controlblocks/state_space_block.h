@@ -16,7 +16,7 @@ namespace ControlBlock
     {
     public:
         StateSpaceBlock(Diagram &diagram)
-            : Block(diagram), min_node_width_(50.0)
+            : Block(diagram), min_node_width_(50.0), settings_open_(true)
         {
         }
 
@@ -26,6 +26,7 @@ namespace ControlBlock
         void ApplyInitial() override;
         void Compute(double t) override;
         void Render() override;
+        void Settings() override;
 
         // Serialization
         toml::table Serialize() override;
@@ -35,6 +36,20 @@ namespace ControlBlock
         ControlUtils::StateSpace ss;
 
         const float min_node_width_;
+
+        bool settings_open_;
+
+        // Matrices
+        Eigen::MatrixXd A_;
+        Eigen::MatrixXd B_;
+        Eigen::MatrixXd C_;
+        Eigen::MatrixXd D_;
+
+        // Matrix names
+        std::string A_mat_str_;
+        std::string B_mat_str_;
+        std::string C_mat_str_;
+        std::string D_mat_str_;
     };
 
 } // namespace ControlBlock

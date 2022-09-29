@@ -1,5 +1,12 @@
 #include "controlblocks/state_space_block.h"
 #include "controlblocks/diagram.h"
+#include "controlblocks/python_utils.h"
+
+#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+namespace py = pybind11;
 
 namespace ControlBlock
 {
@@ -19,6 +26,46 @@ namespace ControlBlock
 
     void StateSpaceBlock::ApplyInitial()
     {
+        // Load the matrices from the workspace
+        std::string errors = "";
+        bool is_success = true;
+
+        // A
+        if (!PythonUtils::GetWorkspaceVariable<Eigen::MatrixXd>(A_mat_str_,
+                                                                &errors, &A_))
+        {
+            py::print(errors);
+            is_success = false;
+        }
+        // B
+        if (!PythonUtils::GetWorkspaceVariable<Eigen::MatrixXd>(B_mat_str_,
+                                                                &errors, &B_))
+        {
+            py::print(errors);
+            is_success = false;
+        }
+        // C
+        if (!PythonUtils::GetWorkspaceVariable<Eigen::MatrixXd>(C_mat_str_,
+                                                                &errors, &C_))
+        {
+            py::print(errors);
+            is_success = false;
+        }
+        // D
+        if (!PythonUtils::GetWorkspaceVariable<Eigen::MatrixXd>(D_mat_str_,
+                                                                &errors, &D_))
+        {
+            py::print(errors);
+            is_success = false;
+        }
+
+        // If this is not a success, throw an exception
+        if (!is_success)
+        {
+            throw std::runtime_error("Error: block '" + name_ +
+                                     "' missing inputs");
+        }
+
         // Output the initial condition to ensure feedback works
         this->SetOutput(output_ids_[0], x_);
     }
@@ -73,6 +120,8 @@ namespace ControlBlock
         // Output
         ImGui::BeginGroup();
         ImNodes::BeginOutputAttribute(output_ids_[0]);
+        const float label_width = ImGui::CalcTextSize("y").x;
+        ImGui::Indent(node_width - label_width);
         ImGui::TextUnformatted("y");
         ImNodes::EndOutputAttribute();
         ImGui::EndGroup();
@@ -81,6 +130,53 @@ namespace ControlBlock
         ImGui::PopItemWidth();
 
         ImNodes::EndNode();
+    }
+
+    void StateSpaceBlock::Settings()
+    {
+        // If node is double clicked, show the settings
+        int hover_id = -1;
+        ImNodes::IsNodeHovered(&hover_id);
+        if ((hover_id == this->id_ && ImGui::IsMouseDoubleClicked(0)) ||
+            settings_open_)
+        {
+            settings_open_ = true;
+            std::string setting_name = this->name_ + " settings";
+            bool is_open = true;
+            ImGui::Begin(setting_name.c_str(), &is_open);
+            if (settings_open_)
+            {
+                // Set the focus to the settings so the window isn't hidden.
+                ImGui::SetWindowFocus();
+                // Modify matrices
+                // A
+                char A_str[128];
+                strcpy(A_str, A_mat_str_.c_str());
+                ImGui::InputText("A:", A_str, IM_ARRAYSIZE(A_str));
+                A_mat_str_ = A_str;
+
+                // B
+                char B_str[128];
+                strcpy(B_str, B_mat_str_.c_str());
+                ImGui::InputText("B:", B_str, IM_ARRAYSIZE(B_str));
+                B_mat_str_ = B_str;
+
+                // C
+                char C_str[128];
+                strcpy(C_str, C_mat_str_.c_str());
+                ImGui::InputText("C:", C_str, IM_ARRAYSIZE(C_str));
+                C_mat_str_ = C_str;
+
+                // D
+                char D_str[128];
+                strcpy(D_str, D_mat_str_.c_str());
+                ImGui::InputText("D:", D_str, IM_ARRAYSIZE(D_str));
+                D_mat_str_ = D_str;
+            }
+            ImGui::End();
+
+            settings_open_ = is_open;
+        }
     }
 
     toml::table StateSpaceBlock::Serialize()
@@ -112,7 +208,11 @@ namespace ControlBlock
                                       {"inputs", input_arr},
                                       {"outputs", output_arr},
                                       {"x_pos", pos.x},
-                                      {"y_pos", pos.y}};
+                                      {"y_pos", pos.y},
+                                      {"A", A_mat_str_},
+                                      {"B", B_mat_str_},
+                                      {"C", C_mat_str_},
+                                      {"D", D_mat_str_}};
 
         return tbl;
     }
