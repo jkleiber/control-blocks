@@ -97,7 +97,15 @@ if(WIN32)
         ${NFD_DIR}/src/nfd_common.h
         ${NFD_DIR}/src/nfd_win.cpp
     )
+
+    target_include_directories(NFD
+        PUBLIC
+        ${NFD_DIR}/src/include
+    )
 else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+
     target_sources(NFD
         PRIVATE
         ${NFD_DIR}/src/common.h
@@ -107,12 +115,15 @@ else()
         ${NFD_DIR}/src/nfd_zenity.c
         ${NFD_DIR}/src/simple_exec.h
     )
-endif(WIN32)
 
-target_include_directories(NFD
-    PUBLIC
-    ${NFD_DIR}/src/include
-)
+    target_link_libraries(NFD PUBLIC ${GTK3_LIBRARIES})
+
+    target_include_directories(NFD
+        PUBLIC
+        ${NFD_DIR}/src/include
+        ${GTK3_INCLUDE_DIRS}
+    )
+endif(WIN32)
 
 # ================ PyBind11 ==============
 # Find Python
