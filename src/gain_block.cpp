@@ -19,10 +19,12 @@ namespace ControlBlock
         x0_ = Eigen::VectorXd::Zero(1);
     }
 
-    void GainBlock::ApplyInitial()
+    bool GainBlock::ApplyInitial()
     {
         Block::SetOutput(output_ids_[0], x0_);
         Block::Broadcast();
+
+        return true;
     }
 
     void GainBlock::SetInitial(Eigen::VectorXd x0) { x0_ = x0; }

@@ -11,6 +11,7 @@
 #include "toml++/toml.h"
 #include <Eigen/Dense>
 
+#include "controlblocks/code_tools.h"
 #include "controlblocks/port.h"
 #include "controlblocks/serializable.h"
 
@@ -31,7 +32,7 @@ namespace ControlBlock
                   std::vector<bool> input_optionals = std::vector<bool>(),
                   bool dynamic_sys = false);
         void Broadcast();
-        virtual void ApplyInitial();
+        virtual bool ApplyInitial();
         virtual void Compute(double t);
         virtual void Render();
         virtual void Settings();

@@ -29,7 +29,7 @@ public:
     Gui(){};
 
     void Init();
-    void Update();
+    bool Update();
     void Render();
     void Stop();
 

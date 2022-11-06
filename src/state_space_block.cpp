@@ -24,7 +24,7 @@ namespace ControlBlock
                     true);
     }
 
-    void StateSpaceBlock::ApplyInitial()
+    bool StateSpaceBlock::ApplyInitial()
     {
         // Load the matrices from the workspace
         std::string errors = "";
@@ -62,12 +62,15 @@ namespace ControlBlock
         // If this is not a success, throw an exception
         if (!is_success)
         {
+            // CHECK_MSG(false, "Error: block '" + name_ + "' missing inputs");
             throw std::runtime_error("Error: block '" + name_ +
                                      "' missing inputs");
         }
 
         // Output the initial condition to ensure feedback works
         this->SetOutput(output_ids_[0], x_);
+
+        return is_success;
     }
 
     void StateSpaceBlock::Compute(double t)

@@ -58,12 +58,13 @@ namespace ControlBlock
         }
     }
 
-    void Block::ApplyInitial()
+    bool Block::ApplyInitial()
     {
         /**
          * @brief Implement this in a sub-block to have an initialization
          * routine.
          */
+        return true;
     }
 
     void Block::SetInitial(Eigen::VectorXd x0) { x_ = x0; }

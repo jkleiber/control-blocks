@@ -69,6 +69,7 @@ target_link_libraries(controlblocks_lib
     ImGuiColorTextEdit
     NFD
     ${Python_LIBRARIES}
+    pybind11::pybind11
     pybind11::embed)
 
 # All users of this library will need at least C++17

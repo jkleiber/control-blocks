@@ -23,7 +23,7 @@ namespace ControlBlock
         void Init(std::string block_name = "State Space");
 
         // Overriden Block functions
-        void ApplyInitial() override;
+        bool ApplyInitial() override;
         void Compute(double t) override;
         void Render() override;
         void Settings() override;

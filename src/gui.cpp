@@ -78,7 +78,7 @@ void Gui::Init()
     diagram_.Init();
 }
 
-void Gui::Update()
+bool Gui::Update()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -106,6 +106,8 @@ void Gui::Update()
 
     // Show the diagram
     diagram_.Update(gui_data_);
+
+    return true;
 }
 
 void Gui::Render()

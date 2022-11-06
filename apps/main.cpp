@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 
+#include "controlblocks/code_tools.h"
 #include "controlblocks/gui.h"
 
 #include <pybind11/embed.h>
@@ -21,8 +22,26 @@ PYBIND11_EMBEDDED_MODULE(py_console, module)
         .def("flush", &Console::Flush);
 }
 
+static void ConfigurePython()
+{
+    char *pyhome_path = std::getenv("PYTHONHOME");
+
+    if (pyhome_path != nullptr)
+    {
+        // WARNING! According to Py_SetPythonHome(..) this must be static, or
+        // otherwise ensured that out-lives initialized CPython instance!
+        std::string pyhome_str = pyhome_path;
+        static std::wstring pyhome_runtime_wstr(pyhome_str.begin(),
+                                                pyhome_str.end());
+        Py_SetPythonHome(const_cast<wchar_t *>(pyhome_runtime_wstr.data()));
+    }
+}
+
 int main(int argc, char **argv)
 {
+    // Configure python using environment variables
+    ConfigurePython();
+
     // Initialize the GUI
     std::shared_ptr<Gui> gui = std::make_shared<Gui>();
     gui->Init();
@@ -32,22 +51,8 @@ int main(int argc, char **argv)
     while (!done)
     {
         // Update GUI inputs
-        try
-        {
-            gui->Update();
-        }
-        catch (std::runtime_error e)
-        {
-            std::cout << e.what() << std::endl;
-            done = true;
-            break;
-        }
-        catch (const std::exception &exc)
-        {
-            // catch anything thrown within try block that derives from
-            // std::exception
-            std::cerr << exc.what();
-        }
+
+        CB_CALL(gui->Update());
 
         // Render GUI
         gui->Render();
